@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 type PlayerCardRevealProps = {
   name: string;
@@ -21,9 +22,9 @@ export default function PlayerCardReveal({ name, image, onClose }: PlayerCardRev
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-8"
+      className="fixed inset-0 z-9999 flex items-center justify-center p-3 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={`Player card di ${name}`}
@@ -31,15 +32,15 @@ export default function PlayerCardReveal({ name, image, onClose }: PlayerCardRev
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-black/85 backdrop-blur-md"
+        className="absolute inset-0 bg-black/92 backdrop-blur-lg"
         aria-label="Chiudi"
       />
 
-      <div className="relative z-10 w-full max-w-4xl">
+      <div className="relative z-10 w-full max-w-5xl animate-[popup-in_0.28s_ease-out]">
         <button
           type="button"
           onClick={onClose}
-          className="absolute -top-2 right-0 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/70 text-xl text-zinc-300 transition hover:border-accent/40 hover:text-accent sm:-right-2"
+          className="absolute -top-3 right-0 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/80 text-2xl leading-none text-zinc-200 transition hover:border-accent/50 hover:text-accent sm:-right-3"
           aria-label="Chiudi player card"
         >
           ×
@@ -49,9 +50,10 @@ export default function PlayerCardReveal({ name, image, onClose }: PlayerCardRev
         <img
           src={image}
           alt={`Player card — ${name}`}
-          className="mx-auto max-h-[85vh] w-full rounded-2xl object-contain shadow-card-hover ring-1 ring-white/10"
+          className="mx-auto max-h-[88vh] w-auto max-w-[min(960px,96vw)] rounded-xl object-contain shadow-card-hover ring-1 ring-white/15"
         />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
