@@ -1,5 +1,9 @@
+"use client";
+
+import { useState } from "react";
 import type { DraftSlot, PlayerProfile } from "@/data/players";
-import { getPlayerCardUrl } from "@/data/players";
+import { getPlayerCardImage, getPlayerCardUrl } from "@/data/players";
+import PlayerCardReveal from "./PlayerCardReveal";
 
 type PlayerCardProps = {
   slot: DraftSlot;
@@ -25,7 +29,11 @@ function EmptySlot({ slot }: { slot: number }) {
 }
 
 function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
-  const url = getPlayerCardUrl(player);
+  const [revealed, setRevealed] = useState(false);
+  const cardImage = getPlayerCardImage(player);
+  const externalUrl = getPlayerCardUrl(player);
+  const isClickable = Boolean(cardImage || externalUrl);
+
   const initials = player.name
     .split(" ")
     .map((n) => n[0])
@@ -33,11 +41,36 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
     .slice(0, 2)
     .toUpperCase();
 
+  function handleClick() {
+    if (cardImage) {
+      setRevealed(true);
+      return;
+    }
+    if (externalUrl) {
+      window.open(externalUrl, "_blank", "noopener,noreferrer");
+    }
+  }
+
   const card = (
     <article
       className={`group relative flex aspect-3/4 flex-col overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-card ring-1 ring-white/5 transition duration-300 ${
-        url ? "cursor-pointer hover:-translate-y-1 hover:border-accent/25 hover:shadow-card-hover" : ""
+        isClickable
+          ? "cursor-pointer hover:-translate-y-1 hover:border-accent/25 hover:shadow-card-hover"
+          : ""
       }`}
+      onClick={isClickable ? handleClick : undefined}
+      onKeyDown={
+        isClickable
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick();
+              }
+            }
+          : undefined
+      }
+      role={isClickable ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
     >
       <div className="accent-line absolute inset-x-0 top-0 z-20 h-px opacity-80" />
 
@@ -68,17 +101,17 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
     </article>
   );
 
-  if (!url) return card;
-
   return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-    >
+    <>
       {card}
-    </a>
+      {revealed && cardImage && (
+        <PlayerCardReveal
+          name={player.name}
+          image={cardImage}
+          onClose={() => setRevealed(false)}
+        />
+      )}
+    </>
   );
 }
 
