@@ -87,13 +87,6 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
             <span className="font-display text-5xl font-bold text-white/90">{initials}</span>
           </div>
         )}
-        {cardImage && (
-          <div className="pointer-events-none absolute inset-0 flex items-end justify-center bg-black/0 pb-4 transition group-hover:bg-black/35">
-            <span className="translate-y-2 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-black opacity-0 transition group-hover:translate-y-0 group-hover:opacity-100">
-              Apri player card
-            </span>
-          </div>
-        )}
         <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/90 via-black/10 to-transparent" />
         <div className="absolute left-3 top-3 z-10 flex h-8 min-w-8 items-center justify-center rounded-lg bg-accent px-2 shadow-accent-badge">
           <span className="font-display text-sm font-bold leading-none text-black">#{slot}</span>
