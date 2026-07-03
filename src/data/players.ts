@@ -1,7 +1,9 @@
 /**
- * Aggiungi manualmente ogni giocatore in `draftSlots`.
- * - `player: null` → slot vuoto in attesa del drop
- * - `playerCardUrl` → link alla Player Card KataHero (bottoni apri / condividi)
+ * Due sezioni separate:
+ * - `discoverSlots` → 40 slot "Da scoprire" (prossima domenica)
+ * - `pickedSlots` → talenti "Rivelate" (restano permanentemente)
+ *
+ * Aggiungi `playerCardUrl` per linkare la Player Card KataHero.
  */
 
 export type PlayerProfile = {
@@ -19,7 +21,6 @@ export type PlayerProfile = {
   dominantHand?: string;
   photo?: string;
   teamLogo?: string;
-  /** Player Card KataHero dell'atleta — es. https://nome.katahero.com */
   playerCardUrl?: string;
   seasonStats?: {
     season: string;
@@ -34,8 +35,8 @@ export type DraftSlot = {
   player: PlayerProfile | null;
 };
 
-/** Modifica questo array — max 40 slot */
-export const draftSlots: DraftSlot[] = [
+/** 40 slot da scoprire — si azzerano ogni lunedì, i giocatori passano in Rivelate */
+export const discoverSlots: DraftSlot[] = [
   {
     slot: 1,
     player: {
@@ -62,14 +63,12 @@ export const draftSlots: DraftSlot[] = [
   })),
 ];
 
-export function getAllSlots(): DraftSlot[] {
-  return draftSlots.slice(0, 40);
-}
+/** Talent rivelati — restano sempre in sezione Rivelate */
+export const pickedSlots: DraftSlot[] = [];
 
 export function getPlayerCardUrl(player: PlayerProfile): string | undefined {
   return player.playerCardUrl;
 }
 
-export function getPublishedSlots(): DraftSlot[] {
-  return getAllSlots().filter((s) => s.player !== null);
-}
+/** @deprecated use discoverSlots */
+export const draftSlots = discoverSlots;

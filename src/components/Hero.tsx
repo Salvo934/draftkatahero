@@ -38,8 +38,9 @@ export default function Hero() {
         </h1>
 
         <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
-          Clicca sul nome del giocatore per aprire la scheda completa.
-          Ogni domenica alle 21:00 si aggiornano i nuovi slot.
+          Clicca sulla card per aprire la player card dell&apos;atleta.
+          Ogni domenica alle 21:00 il drop va live — a fine domenica i talenti
+          passano in Rivelate e si aprono 40 nuovi slot.
         </p>
 
         {/* Stats */}
@@ -67,7 +68,10 @@ export default function Hero() {
 
         {/* CTA row */}
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <a href="#board" className="btn-accent inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold sm:w-auto sm:text-base">
+          <a
+            href="#board"
+            className="btn-accent inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold sm:w-auto sm:text-base"
+          >
             Vai al Draft Board
             <span aria-hidden>→</span>
           </a>

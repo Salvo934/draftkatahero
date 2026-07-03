@@ -26,7 +26,13 @@ export default function SiteHeader() {
             href="#board"
             className="rounded-full px-3.5 py-2 text-[13px] font-medium text-zinc-400 transition hover:bg-white/10 hover:text-white lg:px-4"
           >
-            Draft Board
+            Da scoprire
+          </a>
+          <a
+            href="#rivelate"
+            className="rounded-full px-3.5 py-2 text-[13px] font-medium text-zinc-400 transition hover:bg-white/10 hover:text-white lg:px-4"
+          >
+            Rivelate
           </a>
           <a
             href="https://www.katahero.com/talent-board"

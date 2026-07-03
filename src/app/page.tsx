@@ -1,5 +1,5 @@
 import Countdown from "@/components/Countdown";
-import DraftGrid from "@/components/DraftGrid";
+import DraftBoard from "@/components/DraftBoard";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import SiteHeader from "@/components/SiteHeader";
@@ -11,7 +11,7 @@ export default function Home() {
       <Countdown />
       <main>
         <Hero />
-        <DraftGrid />
+        <DraftBoard />
       </main>
       <Footer />
     </div>

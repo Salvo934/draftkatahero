@@ -163,6 +163,44 @@ body {
   opacity: 0;
 }
 
+.carousel-track {
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 229, 160, 0.25) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+.carousel-track::-webkit-scrollbar {
+  height: 4px;
+}
+
+.carousel-slide {
+  flex: 0 0 auto;
+  width: clamp(9.5rem, 28vw, 11.5rem);
+  scroll-snap-align: start;
+}
+
+.carousel-wrap::before,
+.carousel-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0.5rem;
+  width: 2.5rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.carousel-wrap::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-deep), transparent);
+}
+
+.carousel-wrap::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-deep), transparent);
+}
+
 @keyframes ticker {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
