@@ -1,3 +1,5 @@
+import { SLOT_COUNT } from "@/lib/draft-config";
+
 /** Draft week ends Sunday at 23:59:59 (local time). Reset Monday 00:00. */
 
 export function formatWeekKey(date: Date): string {
@@ -35,7 +37,7 @@ export function formatWeekLabel(weekKey: string): string {
 }
 
 export function createEmptySlots(): { slot: number; player: null }[] {
-  return Array.from({ length: 40 }, (_, i) => ({
+  return Array.from({ length: SLOT_COUNT }, (_, i) => ({
     slot: i + 1,
     player: null as null,
   }));

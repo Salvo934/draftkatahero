@@ -17,10 +17,10 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "DraftKataHero — Il Draft della Domenica",
   description:
-    "Ogni domenica sera alle 21:00: 40 slot, 40 giocatori. Il draft settimanale KataHero.",
+    "Ogni domenica sera alle 21:00: 30 slot, rivelazione una alla volta. Il draft settimanale KataHero.",
   openGraph: {
     title: "DraftKataHero",
-    description: "40 slot. Ogni domenica. Zero compromessi.",
+    description: "30 slot. Ogni domenica. Una card ogni 7 secondi.",
     type: "website",
   },
 };

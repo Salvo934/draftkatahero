@@ -1,10 +1,11 @@
+import { SLOT_COUNT } from "@/lib/draft-config";
+
 /**
  * Due sezioni separate:
- * - `discoverSlots` → 40 slot "Da scoprire" (prossima domenica)
+ * - `discoverSlots` → slot "Da scoprire" (prossima domenica)
  * - `pickedSlots` → talenti "Rivelate" (restano permanentemente)
  *
  * Aggiungi `cardImage` per la player card grafica (lightbox al click).
- * Opzionale: `playerCardUrl` per link esterno se non c'è cardImage.
  */
 
 export type PlayerProfile = {
@@ -22,9 +23,7 @@ export type PlayerProfile = {
   dominantHand?: string;
   photo?: string;
   teamLogo?: string;
-  /** Immagine player card — si apre in lightbox al click */
   cardImage?: string;
-  /** Link esterno opzionale — usato solo se manca cardImage */
   playerCardUrl?: string;
   seasonStats?: {
     season: string;
@@ -39,7 +38,7 @@ export type DraftSlot = {
   player: PlayerProfile | null;
 };
 
-/** 40 slot da scoprire — si azzerano ogni lunedì, i giocatori passano in Rivelate */
+/** Slot da scoprire — si azzerano ogni lunedì, i giocatori passano in Rivelate */
 export const discoverSlots: DraftSlot[] = [
   {
     slot: 1,
@@ -50,19 +49,15 @@ export const discoverSlots: DraftSlot[] = [
       team: "Benacquista Assicurazioni Latina",
       country: "Italia",
       height: "200 cm",
-      weight: "98 kg",
       birthYear: "2004",
       category: "Serie B",
       availability: "Disponibile",
-      strongPoint: "Fisico importante: impatto nel pitturato e al contatto.",
-      dominantHand: "Destra",
       photo: "/players/ilario-simonetti.jpg",
       cardImage: "/players/ilario-card.png",
       playerCardUrl: "https://ilariosimonetti7.katahero.com",
-      seasonStats: { season: "25/26", points: "5,7", rebounds: "1,8", assists: "1,0" },
     },
   },
-  ...Array.from({ length: 39 }, (_, i) => ({
+  ...Array.from({ length: SLOT_COUNT - 1 }, (_, i) => ({
     slot: i + 2,
     player: null as PlayerProfile | null,
   })),

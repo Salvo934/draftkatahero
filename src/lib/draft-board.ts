@@ -1,6 +1,7 @@
 import type { DraftSlot } from "@/data/players";
 import { discoverSlots as seedDiscover, pickedSlots as seedPicked } from "@/data/players";
 import { createEmptySlots, formatWeekLabel, getCurrentPeriodWeekKey } from "@/lib/draft-cycle";
+import { SLOT_COUNT } from "@/lib/draft-config";
 
 type StoredBoard = {
   version: 2;
@@ -9,7 +10,7 @@ type StoredBoard = {
   pickedSlots: DraftSlot[];
 };
 
-const STORAGE_KEY = "draftkatahero-board-v2";
+const STORAGE_KEY = "draftkatahero-board-v5";
 
 function readStorage(): StoredBoard | null {
   if (typeof window === "undefined") return null;
@@ -31,7 +32,7 @@ function mergeDiscoverSlots(stored: DraftSlot[]): DraftSlot[] {
   for (const seed of seedDiscover) {
     if (seed.player) bySlot.set(seed.slot, seed);
   }
-  return Array.from({ length: 40 }, (_, i) => bySlot.get(i + 1) ?? { slot: i + 1, player: null });
+  return Array.from({ length: SLOT_COUNT }, (_, i) => bySlot.get(i + 1) ?? { slot: i + 1, player: null });
 }
 
 function mergePickedSlots(stored: DraftSlot[]): DraftSlot[] {

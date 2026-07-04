@@ -1,3 +1,5 @@
+import { SLOT_COUNT } from "@/lib/draft-config";
+
 export default function Hero() {
   return (
     <section className="relative z-10 overflow-hidden px-4 pb-4 pt-[max(7rem,calc(5.5rem+env(safe-area-inset-top)))] sm:px-6 sm:pb-8 sm:pt-32 lg:px-8">
@@ -16,7 +18,7 @@ export default function Hero() {
                 key={i}
                 className="mx-8 text-[10px] font-semibold uppercase tracking-[0.28em] text-zinc-500 sm:text-[11px]"
               >
-                DRAFTKATAHERO · 40 PICKS · OGNI DOMENICA · 21:00 ·
+                DRAFTKATAHERO · {SLOT_COUNT} PICKS · OGNI DOMENICA · 21:00 ·
                 <span className="text-accent"> ON THE CLOCK </span>·
                 KATAHERO · TALENT BOARD ·
               </span>
@@ -39,14 +41,14 @@ export default function Hero() {
 
         <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
           Clicca sulla card per aprire la player card dell&apos;atleta.
-          Ogni domenica alle 21:00 il drop va live — a fine domenica i talenti
-          passano in Rivelate e si aprono 40 nuovi slot.
+          Ogni domenica alle 21:00 le card si rivelano una alla volta — a fine settimana
+          passano in Rivelate e si aprono {SLOT_COUNT} nuovi slot.
         </p>
 
         {/* Stats */}
         <div className="mx-auto mt-9 grid max-w-2xl grid-cols-3 gap-2.5 sm:gap-4">
           {[
-            { value: "40", label: "Slot", sub: "Giocatori" },
+            { value: String(SLOT_COUNT), label: "Slot", sub: "Giocatori" },
             { value: "DOM", label: "Drop", sub: "Ogni settimana" },
             { value: "21:00", label: "Live", sub: "Orario IT" },
           ].map((stat) => (

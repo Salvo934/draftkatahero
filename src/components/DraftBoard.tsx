@@ -1,25 +1,24 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { DraftBoardState } from "@/lib/draft-board";
 import { loadDraftBoardState } from "@/lib/draft-board";
+import { SLOT_COUNT } from "@/lib/draft-config";
+import {
+  applyDropReveal,
+  getDropPhase,
+  getSecondsUntilNextReveal,
+} from "@/lib/drop-reveal";
 import PlayerCard from "./PlayerCard";
 import PickedCarousel from "./PickedCarousel";
 
-function SlotGrid({
-  slots,
-  animate = true,
-}: {
-  slots: DraftBoardState["discoverSlots"];
-  animate?: boolean;
-}) {
+function DiscoverGrid({ slots }: { slots: DraftBoardState["discoverSlots"] }) {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 xl:gap-5">
-      {slots.map((draftSlot, index) => (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 xl:gap-5">
+      {slots.map((draftSlot) => (
         <div
-          key={draftSlot.slot}
-          className={animate ? "slot-animate" : undefined}
-          style={animate ? { animationDelay: `${index * 35}ms` } : undefined}
+          key={`${draftSlot.slot}-${draftSlot.player?.slug ?? "empty"}`}
+          className={draftSlot.player ? "slot-drop-reveal" : undefined}
         >
           <PlayerCard slot={draftSlot} />
         </div>
@@ -30,7 +29,7 @@ function SlotGrid({
 
 function BoardSkeleton() {
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5 xl:gap-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 xl:gap-5">
       {Array.from({ length: 10 }).map((_, i) => (
         <div
           key={i}
@@ -66,16 +65,31 @@ function SectionHeader({
 
 export default function DraftBoard() {
   const [board, setBoard] = useState<DraftBoardState | null>(null);
+  const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     setBoard(loadDraftBoardState());
 
-    const sync = () => setBoard(loadDraftBoardState());
-    const id = setInterval(sync, 60_000);
-    return () => clearInterval(id);
+    const syncBoard = () => setBoard(loadDraftBoardState());
+    const boardId = setInterval(syncBoard, 60_000);
+    const clockId = setInterval(() => setNow(new Date()), 1000);
+
+    return () => {
+      clearInterval(boardId);
+      clearInterval(clockId);
+    };
   }, []);
 
-  const discoverCount = board?.discoverSlots.filter((s) => s.player).length ?? 0;
+  const filledCount = board?.discoverSlots.filter((s) => s.player).length ?? 0;
+  const displaySlots = useMemo(
+    () => (board ? applyDropReveal(board.discoverSlots, now, board.weekKey) : []),
+    [board, now],
+  );
+  const visibleCount = displaySlots.filter((s) => s.player).length;
+  const dropPhase = board ? getDropPhase(now, board.weekKey, filledCount) : "pre";
+  const nextRevealIn = board
+    ? getSecondsUntilNextReveal(now, board.weekKey, filledCount, visibleCount)
+    : null;
   const pickedCount = board?.pickedSlots.length ?? 0;
 
   return (
@@ -86,15 +100,28 @@ export default function DraftBoard() {
         <SectionHeader
           eyebrow="Prossima domenica"
           title="Da scoprire ·"
-          highlight="40 slot"
+          highlight={`${SLOT_COUNT} slot`}
           description={
             <>
               Clicca sulla card per aprire la player card KataHero.
               {board && (
                 <span className="ml-1 font-semibold text-zinc-300" suppressHydrationWarning>
                   Drop del {board.weekLabel}.
-                  {discoverCount > 0 && (
-                    <> · {discoverCount} già scopert{discoverCount === 1 ? "o" : "i"}.</>
+                  {dropPhase === "pre" && filledCount > 0 && (
+                    <> · {filledCount} talent{filledCount === 1 ? "o" : "i"} in arrivo domenica ore 21:00.</>
+                  )}
+                  {dropPhase === "revealing" && (
+                    <>
+                      {" "}
+                      · Drop live: {visibleCount}/{filledCount} rivelat
+                      {visibleCount === 1 ? "o" : "i"}
+                      {nextRevealIn !== null && nextRevealIn > 0 && (
+                        <> · prossimo tra {nextRevealIn}s</>
+                      )}
+                    </>
+                  )}
+                  {dropPhase === "post" && visibleCount > 0 && (
+                    <> · {visibleCount} scopert{visibleCount === 1 ? "o" : "i"}.</>
                   )}
                 </span>
               )}
@@ -102,7 +129,7 @@ export default function DraftBoard() {
           }
         />
 
-        {!board ? <BoardSkeleton /> : <SlotGrid slots={board.discoverSlots} />}
+        {!board ? <BoardSkeleton /> : <DiscoverGrid slots={displaySlots} />}
       </section>
 
       <section id="rivelate" className="mt-16 scroll-mt-28 border-t border-white/8 pt-10">
