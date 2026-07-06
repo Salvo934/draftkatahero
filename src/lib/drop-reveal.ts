@@ -1,26 +1,42 @@
 import type { DraftSlot } from "@/data/players";
-import { DROP_HOUR, REVEAL_INTERVAL_MS } from "@/lib/draft-config";
+import type { ActivePickAnnouncement } from "@/lib/draft-announcement";
+import { getDraftYearFromWeekKey } from "@/lib/draft-announcement";
+import type { DropRuntime } from "@/lib/drop-runtime";
+import { resolveDropRuntime } from "@/lib/drop-runtime";
 
 export type DropPhase = "pre" | "revealing" | "post";
-
-export function getDropStartFromWeekKey(weekKey: string): Date {
-  const [y, m, d] = weekKey.split("-").map(Number);
-  return new Date(y, m - 1, d, DROP_HOUR, 0, 0, 0);
-}
 
 function getFilledSlots(slots: DraftSlot[]): DraftSlot[] {
   return slots.filter((s) => s.player).sort((a, b) => a.slot - b.slot);
 }
 
-export function getDropPhase(now: Date, weekKey: string, filledCount: number): DropPhase {
-  if (filledCount === 0) return "post";
+function getScheduledSlots(slots: DraftSlot[]): DraftSlot[] {
+  return getFilledSlots(slots).filter((s) => !s.revealed);
+}
 
-  const dropStart = getDropStartFromWeekKey(weekKey);
+function getInstantRevealCount(slots: DraftSlot[]): number {
+  return slots.filter((s) => s.player && s.revealed).length;
+}
 
+export function getDropPhase(
+  now: Date,
+  weekKey: string,
+  slots: DraftSlot[],
+  runtime?: Partial<DropRuntime>,
+): DropPhase {
+  const filled = getFilledSlots(slots);
+  if (filled.length === 0) return "post";
+
+  const scheduled = getScheduledSlots(slots);
+  if (scheduled.length === 0) return "post";
+
+  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
   if (now < dropStart) return "pre";
 
-  const allRevealedAt = dropStart.getTime() + (filledCount - 1) * REVEAL_INTERVAL_MS;
-  if (now.getTime() >= allRevealedAt) return "post";
+  const lastCardAt =
+    dropStart.getTime() + (scheduled.length - 1) * revealIntervalMs + announcementMs;
+
+  if (now.getTime() >= lastCardAt) return "post";
 
   return "revealing";
 }
@@ -28,44 +44,106 @@ export function getDropPhase(now: Date, weekKey: string, filledCount: number): D
 export function getRevealedPlayerCount(
   now: Date,
   weekKey: string,
-  filledCount: number,
+  slots: DraftSlot[],
+  runtime?: Partial<DropRuntime>,
 ): number {
-  if (filledCount === 0) return 0;
+  const filled = getFilledSlots(slots);
+  const instant = getInstantRevealCount(slots);
+  const scheduled = getScheduledSlots(slots);
 
-  const phase = getDropPhase(now, weekKey, filledCount);
-  if (phase === "pre") return 0;
-  if (phase === "post") return filledCount;
+  if (filled.length === 0) return 0;
+  if (scheduled.length === 0) return filled.length;
 
-  const dropStart = getDropStartFromWeekKey(weekKey);
+  const phase = getDropPhase(now, weekKey, slots, runtime);
+  if (phase === "pre") return instant;
+  if (phase === "post") return filled.length;
+
+  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
   const elapsed = now.getTime() - dropStart.getTime();
-  return Math.min(filledCount, Math.floor(elapsed / REVEAL_INTERVAL_MS) + 1);
+  let scheduledVisible = 0;
+
+  for (let i = 0; i < scheduled.length; i++) {
+    if (elapsed >= i * revealIntervalMs + announcementMs) {
+      scheduledVisible = i + 1;
+    }
+  }
+
+  return instant + scheduledVisible;
+}
+
+export function getActivePickAnnouncement(
+  now: Date,
+  weekKey: string,
+  slots: DraftSlot[],
+  runtime?: Partial<DropRuntime>,
+): ActivePickAnnouncement | null {
+  if (getDropPhase(now, weekKey, slots, runtime) !== "revealing") return null;
+
+  const scheduled = getScheduledSlots(slots);
+  if (scheduled.length === 0) return null;
+
+  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
+  const elapsed = now.getTime() - dropStart.getTime();
+  const pickIndex = Math.floor(elapsed / revealIntervalMs);
+
+  if (pickIndex < 0 || pickIndex >= scheduled.length) return null;
+
+  const pickStart = pickIndex * revealIntervalMs;
+  if (elapsed < pickStart || elapsed >= pickStart + announcementMs) return null;
+
+  return {
+    slot: scheduled[pickIndex],
+    year: getDraftYearFromWeekKey(weekKey),
+  };
 }
 
 export function applyDropReveal(
   slots: DraftSlot[],
   now: Date,
   weekKey: string,
+  runtime?: Partial<DropRuntime>,
 ): DraftSlot[] {
-  const filled = getFilledSlots(slots);
-  const revealCount = getRevealedPlayerCount(now, weekKey, filled.length);
-  const revealed = new Set(filled.slice(0, revealCount).map((s) => s.slot));
+  const scheduled = getScheduledSlots(slots);
+  const instantCount = getInstantRevealCount(slots);
+  const revealCount = getRevealedPlayerCount(now, weekKey, slots, runtime);
+  const scheduledVisible = new Set(
+    scheduled.slice(0, Math.max(0, revealCount - instantCount)).map((s) => s.slot),
+  );
 
   return slots.map((s) => {
     if (s.revealed && s.player) return s;
-    return revealed.has(s.slot) ? s : { ...s, player: null };
+    if (scheduledVisible.has(s.slot)) return s;
+    return { ...s, player: null };
   });
 }
 
 export function getSecondsUntilNextReveal(
   now: Date,
   weekKey: string,
-  filledCount: number,
+  slots: DraftSlot[],
   revealedCount: number,
+  runtime?: Partial<DropRuntime>,
 ): number | null {
-  if (getDropPhase(now, weekKey, filledCount) !== "revealing") return null;
-  if (revealedCount >= filledCount) return null;
+  if (getDropPhase(now, weekKey, slots, runtime) !== "revealing") return null;
 
-  const dropStart = getDropStartFromWeekKey(weekKey);
-  const nextRevealAt = dropStart.getTime() + revealedCount * REVEAL_INTERVAL_MS;
-  return Math.max(0, Math.ceil((nextRevealAt - now.getTime()) / 1000));
+  const scheduled = getScheduledSlots(slots);
+  const instant = getInstantRevealCount(slots);
+  const scheduledRevealed = revealedCount - instant;
+
+  if (scheduledRevealed >= scheduled.length) return null;
+
+  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
+  const elapsed = now.getTime() - dropStart.getTime();
+  const pickStart = scheduledRevealed * revealIntervalMs;
+
+  if (elapsed < pickStart + announcementMs) {
+    return Math.max(0, Math.ceil((pickStart + announcementMs - elapsed) / 1000));
+  }
+
+  const nextPickStart = (scheduledRevealed + 1) * revealIntervalMs;
+  if (scheduledRevealed + 1 >= scheduled.length) return null;
+
+  return Math.max(0, Math.ceil((nextPickStart - elapsed) / 1000));
 }
+
+export { getDropStartFromWeekKey } from "@/lib/drop-runtime";

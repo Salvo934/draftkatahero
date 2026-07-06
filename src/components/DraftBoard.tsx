@@ -1,16 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { DraftBoardState } from "@/lib/draft-board";
 import { loadDraftBoardState } from "@/lib/draft-board";
 import { SLOT_COUNT } from "@/lib/draft-config";
+import { createSimulationRuntime, type DropRuntime } from "@/lib/drop-runtime";
 import {
   applyDropReveal,
+  getActivePickAnnouncement,
   getDropPhase,
   getSecondsUntilNextReveal,
 } from "@/lib/drop-reveal";
+import { buildSimulationSlots, SIMULATION_PICK_COUNT } from "@/lib/draft-simulation";
+import DraftPickAnnouncement from "./DraftPickAnnouncement";
 import PlayerCard from "./PlayerCard";
 import PickedCarousel, { HallOfFameCta } from "./PickedCarousel";
+
+type SimulationState = {
+  slots: ReturnType<typeof buildSimulationSlots>;
+  runtime: DropRuntime;
+};
 
 function DiscoverGrid({ slots }: { slots: DraftBoardState["discoverSlots"] }) {
   return (
@@ -66,39 +75,73 @@ function SectionHeader({
 export default function DraftBoard() {
   const [board, setBoard] = useState<DraftBoardState | null>(null);
   const [now, setNow] = useState(() => new Date());
+  const [simulation, setSimulation] = useState<SimulationState | null>(null);
 
   useEffect(() => {
     setBoard(loadDraftBoardState());
 
     const syncBoard = () => setBoard(loadDraftBoardState());
     const boardId = setInterval(syncBoard, 60_000);
-    const clockId = setInterval(() => setNow(new Date()), 1000);
 
     return () => {
       clearInterval(boardId);
-      clearInterval(clockId);
     };
   }, []);
 
-  const filledCount = board?.discoverSlots.filter((s) => s.player).length ?? 0;
+  useEffect(() => {
+    const ms = simulation ? 250 : 1000;
+    const clockId = setInterval(() => setNow(new Date()), ms);
+    return () => clearInterval(clockId);
+  }, [simulation]);
+
+  const startSimulation = useCallback(() => {
+    const start = new Date();
+    setSimulation({
+      slots: buildSimulationSlots(),
+      runtime: createSimulationRuntime(start),
+    });
+    setNow(start);
+    document.getElementById("board")?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  const stopSimulation = useCallback(() => {
+    setSimulation(null);
+  }, []);
+
+  const sourceSlots = simulation?.slots ?? board?.discoverSlots ?? [];
+  const dropRuntime = simulation?.runtime;
+  const weekKey = board?.weekKey ?? "";
+  const isSimulating = Boolean(simulation);
+
+  const filledCount = sourceSlots.filter((s) => s.player).length;
   const displaySlots = useMemo(
-    () => (board ? applyDropReveal(board.discoverSlots, now, board.weekKey) : []),
-    [board, now],
+    () =>
+      board || simulation
+        ? applyDropReveal(sourceSlots, now, weekKey, dropRuntime)
+        : [],
+    [board, simulation, sourceSlots, now, weekKey, dropRuntime],
   );
   const visibleCount = displaySlots.filter((s) => s.player).length;
-  const dropPhase = board ? getDropPhase(now, board.weekKey, filledCount) : "pre";
-  const nextRevealIn = board
-    ? getSecondsUntilNextReveal(now, board.weekKey, filledCount, visibleCount)
-    : null;
+  const dropPhase =
+    board || simulation ? getDropPhase(now, weekKey, sourceSlots, dropRuntime) : "pre";
+  const activeAnnouncement =
+    board || simulation
+      ? getActivePickAnnouncement(now, weekKey, sourceSlots, dropRuntime)
+      : null;
+  const nextRevealIn =
+    board || simulation
+      ? getSecondsUntilNextReveal(now, weekKey, sourceSlots, visibleCount, dropRuntime)
+      : null;
   const pickedCount = board?.pickedSlots.length ?? 0;
 
   return (
     <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
+      {activeAnnouncement && <DraftPickAnnouncement announcement={activeAnnouncement} />}
       <section id="board" className="scroll-mt-28">
         <div className="pointer-events-none absolute inset-x-4 top-10 h-px bg-linear-to-r from-transparent via-white/10 to-transparent sm:inset-x-6 lg:inset-x-8" />
 
         <SectionHeader
-          eyebrow="Prossima domenica"
+          eyebrow={isSimulating ? "Simulazione live" : "Prossima domenica"}
           title="Da scoprire ·"
           highlight={`${SLOT_COUNT} slot`}
           description={
@@ -106,28 +149,67 @@ export default function DraftBoard() {
               Clicca sulla card per aprire la player card KataHero.
               {board && (
                 <span className="ml-1 font-semibold text-zinc-300" suppressHydrationWarning>
-                  Drop del {board.weekLabel}.
-                  {dropPhase === "pre" && filledCount > 0 && (
-                    <> · {filledCount} talent{filledCount === 1 ? "o" : "i"} in arrivo domenica ore 21:00.</>
-                  )}
-                  {dropPhase === "revealing" && (
+                  {isSimulating ? (
                     <>
                       {" "}
-                      · Drop live: {visibleCount}/{filledCount} rivelat
-                      {visibleCount === 1 ? "o" : "i"}
-                      {nextRevealIn !== null && nextRevealIn > 0 && (
+                      · Simulazione drop: {visibleCount}/{filledCount} pick
+                      {dropPhase === "revealing" && nextRevealIn !== null && nextRevealIn > 0 && (
                         <> · prossimo tra {nextRevealIn}s</>
                       )}
+                      {dropPhase === "post" && <> · simulazione completata</>}
                     </>
-                  )}
-                  {dropPhase === "post" && visibleCount > 0 && (
-                    <> · {visibleCount} scopert{visibleCount === 1 ? "o" : "i"}.</>
+                  ) : (
+                    <>
+                      Drop del {board.weekLabel}.
+                      {dropPhase === "pre" && filledCount > 0 && (
+                        <> · {filledCount} talent{filledCount === 1 ? "o" : "i"} in arrivo domenica ore 21:00.</>
+                      )}
+                      {dropPhase === "revealing" && (
+                        <>
+                          {" "}
+                          · Drop live: {visibleCount}/{filledCount} rivelat
+                          {visibleCount === 1 ? "o" : "i"}
+                          {nextRevealIn !== null && nextRevealIn > 0 && (
+                            <> · prossimo tra {nextRevealIn}s</>
+                          )}
+                        </>
+                      )}
+                      {dropPhase === "post" && visibleCount > 0 && (
+                        <> · {visibleCount} scopert{visibleCount === 1 ? "o" : "i"}.</>
+                      )}
+                    </>
                   )}
                 </span>
               )}
             </>
           }
         />
+
+        <div className="mb-8 flex flex-wrap items-center gap-3">
+          {!isSimulating ? (
+            <button
+              type="button"
+              onClick={startSimulation}
+              className="btn-accent inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold"
+            >
+              Simula drop ({SIMULATION_PICK_COUNT} pick)
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={stopSimulation}
+              className="btn-ghost inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              Esci simulazione
+            </button>
+          )}
+          {isSimulating && (
+            <span className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
+              Simulazione attiva
+            </span>
+          )}
+        </div>
 
         {!board ? <BoardSkeleton /> : <DiscoverGrid slots={displaySlots} />}
       </section>
