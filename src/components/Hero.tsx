@@ -20,7 +20,7 @@ export default function Hero() {
               >
                 DRAFTKATAHERO · {SLOT_COUNT} PICKS · OGNI DOMENICA · 21:00 ·
                 <span className="text-accent"> ON THE CLOCK </span>·
-                KATAHERO · TALENT BOARD ·
+                KATAHERO · €9,99/SEZIONE ·
               </span>
             ))}
           </div>
@@ -78,12 +78,10 @@ export default function Hero() {
             <span aria-hidden>→</span>
           </a>
           <a
-            href="https://www.katahero.com/talent-board"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#cosa-riceverai"
             className="btn-ghost inline-flex min-h-12 w-full items-center justify-center rounded-full px-8 py-3.5 text-sm font-semibold text-white sm:w-auto sm:text-base"
           >
-            Scopri Talent Board
+            Scopri cosa riceverai
           </a>
         </div>
       </div>

@@ -3,6 +3,7 @@ import DraftBoard from "@/components/DraftBoard";
 import Footer from "@/components/Footer";
 import Hero from "@/components/Hero";
 import SiteHeader from "@/components/SiteHeader";
+import WhatYouGetSection from "@/components/WhatYouGetSection";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       <Countdown />
       <main>
         <Hero />
+        <WhatYouGetSection />
         <DraftBoard />
       </main>
       <Footer />
