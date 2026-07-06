@@ -17,17 +17,15 @@ export default function WhatYouGetSection() {
       <div className="mx-auto max-w-6xl">
         <div className="mb-10 max-w-2xl">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
-            Abbonamento KataHero
+            Dopo il draft…
           </p>
           <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-[2.45rem] md:leading-[1.14]">
             Scopri cosa{" "}
             <span className="text-gradient-accent">riceverai</span>
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-zinc-400 sm:text-base">
-            Ogni atleta su KataHero ha la propria <strong className="font-semibold text-zinc-200">player card</strong>{" "}
-            e la propria <strong className="font-semibold text-zinc-200">pagina hero</strong> — il profilo
-            professionale completo. Con DraftKataHero scopri i talenti; con l&apos;abbonamento li
-            sblocchi sul tuo profilo.
+            Sei stato scelto nel draft? Ecco cosa ti aspetta su KataHero — la player card e la
+            pagina hero del tuo profilo professionale.
           </p>
         </div>
 
@@ -104,15 +102,10 @@ export default function WhatYouGetSection() {
                 €{KATAHERO_SECTION_PRICE}
                 <span className="ml-2 text-lg font-semibold text-zinc-400">/ anno</span>
               </p>
-              <p className="mt-2 max-w-lg text-sm leading-relaxed text-zinc-400">
-                <strong className="font-semibold text-zinc-200">Un prezzo per ogni sezione.</strong>{" "}
-                Player card, pagina hero, stats, media… ogni blocco del tuo profilo KataHero costa{" "}
-                €{KATAHERO_SECTION_PRICE} all&apos;anno. Aggiungi una sezione? Sono €{KATAHERO_SECTION_PRICE} in più.
-              </p>
-              <ul className="mt-4 space-y-2 text-sm text-zinc-400">
+              <ul className="mt-4 space-y-2 text-sm text-zinc-300">
                 <li className="flex items-start gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  Player card ad alta risoluzione
+                  Player card
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
@@ -120,7 +113,7 @@ export default function WhatYouGetSection() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  Ogni sezione extra: +€{KATAHERO_SECTION_PRICE}/anno
+                  Premium
                 </li>
               </ul>
             </div>
@@ -130,7 +123,7 @@ export default function WhatYouGetSection() {
               rel="noopener noreferrer"
               className="btn-accent inline-flex shrink-0 items-center justify-center rounded-full px-8 py-4 text-sm font-bold uppercase tracking-wide sm:text-base"
             >
-              Acquista su KataHero
+              Sblocca la tua player card
             </a>
           </div>
         </div>
