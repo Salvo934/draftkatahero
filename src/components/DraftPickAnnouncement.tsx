@@ -7,6 +7,7 @@ import {
   getPickAnnouncementMs,
   PICK_ANNOUNCEMENT_AUDIO,
 } from "@/lib/draft-announcement";
+import { playPickAudio } from "@/lib/pick-audio";
 
 type DraftPickAnnouncementProps = {
   announcement: ActivePickAnnouncement;
@@ -26,6 +27,7 @@ export default function DraftPickAnnouncement({
   useEffect(() => {
     completedRef.current = false;
     let cancelled = false;
+    const durationMs = getPickAnnouncementMs(slot.slot);
 
     const finish = () => {
       if (cancelled || completedRef.current) return;
@@ -34,25 +36,36 @@ export default function DraftPickAnnouncement({
     };
 
     const src = PICK_ANNOUNCEMENT_AUDIO[slot.slot];
-    if (!src) {
-      const timer = setTimeout(finish, getPickAnnouncementMs(slot.slot));
-      return () => {
-        cancelled = true;
-        clearTimeout(timer);
-      };
-    }
+    let audio: HTMLAudioElement | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
 
-    const audio = new Audio(src);
-    audio.addEventListener("ended", finish);
-    audio.addEventListener("error", finish);
-    void audio.play().catch(finish);
+    const finishOnce = () => {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+      if (audio) {
+        audio.removeEventListener("ended", finishOnce);
+        audio.removeEventListener("error", finishOnce);
+      }
+      finish();
+    };
+
+    timer = setTimeout(finishOnce, durationMs);
+
+    if (src) {
+      audio = playPickAudio(src);
+      audio.addEventListener("ended", finishOnce);
+      audio.addEventListener("error", finishOnce);
+    }
 
     return () => {
       cancelled = true;
-      audio.pause();
-      audio.currentTime = 0;
-      audio.removeEventListener("ended", finish);
-      audio.removeEventListener("error", finish);
+      if (timer) clearTimeout(timer);
+      if (audio) {
+        audio.removeEventListener("ended", finishOnce);
+        audio.removeEventListener("error", finishOnce);
+      }
     };
   }, [slot.slot, slot.player?.slug]);
 

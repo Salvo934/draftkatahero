@@ -19,6 +19,7 @@ import {
   startNextSimulationIntro,
   type SimulationPlayback,
 } from "@/lib/simulation-playback";
+import { stopPickAudio, unlockPickAudio } from "@/lib/pick-audio";
 import DraftPickAnnouncement from "./DraftPickAnnouncement";
 import PlayerCard from "./PlayerCard";
 import PickedCarousel, { HallOfFameCta } from "./PickedCarousel";
@@ -42,6 +43,7 @@ function DiscoverGrid({
           <PlayerCard slot={draftSlot} />
           {activeAnnouncement?.slot.slot === draftSlot.slot && (
             <DraftPickAnnouncement
+              key={`intro-${draftSlot.slot}-${activeAnnouncement.slot.player?.slug ?? "pick"}`}
               announcement={activeAnnouncement}
               onComplete={onIntroComplete}
             />
@@ -123,11 +125,13 @@ export default function DraftBoard() {
   }, [simPlayback?.awaitingNextIntro, board?.weekKey]);
 
   const startSimulation = useCallback(() => {
+    unlockPickAudio();
     const slots = buildSimulationSlots();
     setSimPlayback(createSimulationPlayback(slots, board?.weekKey ?? ""));
   }, [board?.weekKey]);
 
   const stopSimulation = useCallback(() => {
+    stopPickAudio();
     setSimPlayback(null);
   }, []);
 
