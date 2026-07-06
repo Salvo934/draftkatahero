@@ -1,10 +1,22 @@
 import type { DraftSlot } from "@/data/players";
 import type { ActivePickAnnouncement } from "@/lib/draft-announcement";
-import { getDraftYearFromWeekKey } from "@/lib/draft-announcement";
+import {
+  getDraftYearFromWeekKey,
+  getPickAnnouncementMs,
+} from "@/lib/draft-announcement";
 import type { DropRuntime } from "@/lib/drop-runtime";
 import { resolveDropRuntime } from "@/lib/drop-runtime";
+import { BETWEEN_PICKS_MS } from "@/lib/draft-config";
 
 export type DropPhase = "pre" | "revealing" | "post";
+
+type PickTimelineEntry = {
+  slot: DraftSlot;
+  index: number;
+  startMs: number;
+  announcementMs: number;
+  revealMs: number;
+};
 
 function getFilledSlots(slots: DraftSlot[]): DraftSlot[] {
   return slots.filter((s) => s.player).sort((a, b) => a.slot - b.slot);
@@ -18,6 +30,35 @@ function getInstantRevealCount(slots: DraftSlot[]): number {
   return slots.filter((s) => s.player && s.revealed).length;
 }
 
+function buildPickTimeline(
+  scheduled: DraftSlot[],
+  defaultAnnouncementMs: number,
+): PickTimelineEntry[] {
+  let cursor = 0;
+
+  return scheduled.map((slot, index) => {
+    const announcementMs = getPickAnnouncementMs(slot.slot, defaultAnnouncementMs);
+    const startMs = cursor;
+    const revealMs = startMs + announcementMs;
+    cursor = revealMs + BETWEEN_PICKS_MS;
+
+    return { slot, index, startMs, announcementMs, revealMs };
+  });
+}
+
+function resolveTimeline(
+  slots: DraftSlot[],
+  runtime?: Partial<DropRuntime>,
+): { scheduled: DraftSlot[]; timeline: PickTimelineEntry[]; dropStart: Date } | null {
+  const scheduled = getScheduledSlots(slots);
+  if (scheduled.length === 0) return null;
+
+  const { dropStart, announcementMs } = resolveDropRuntime("", runtime);
+  const timeline = buildPickTimeline(scheduled, announcementMs);
+
+  return { scheduled, timeline, dropStart };
+}
+
 export function getDropPhase(
   now: Date,
   weekKey: string,
@@ -27,16 +68,14 @@ export function getDropPhase(
   const filled = getFilledSlots(slots);
   if (filled.length === 0) return "post";
 
-  const scheduled = getScheduledSlots(slots);
-  if (scheduled.length === 0) return "post";
+  const resolved = resolveTimeline(slots, runtime);
+  if (!resolved) return "post";
 
-  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
+  const { timeline, dropStart } = resolved;
   if (now < dropStart) return "pre";
 
-  const lastCardAt =
-    dropStart.getTime() + (scheduled.length - 1) * revealIntervalMs + announcementMs;
-
-  if (now.getTime() >= lastCardAt) return "post";
+  const lastRevealMs = timeline[timeline.length - 1].revealMs;
+  if (now.getTime() >= dropStart.getTime() + lastRevealMs) return "post";
 
   return "revealing";
 }
@@ -49,23 +88,22 @@ export function getRevealedPlayerCount(
 ): number {
   const filled = getFilledSlots(slots);
   const instant = getInstantRevealCount(slots);
-  const scheduled = getScheduledSlots(slots);
 
   if (filled.length === 0) return 0;
-  if (scheduled.length === 0) return filled.length;
+
+  const resolved = resolveTimeline(slots, runtime);
+  if (!resolved) return filled.length;
 
   const phase = getDropPhase(now, weekKey, slots, runtime);
   if (phase === "pre") return instant;
   if (phase === "post") return filled.length;
 
-  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
+  const { timeline, dropStart } = resolved;
   const elapsed = now.getTime() - dropStart.getTime();
   let scheduledVisible = 0;
 
-  for (let i = 0; i < scheduled.length; i++) {
-    if (elapsed >= i * revealIntervalMs + announcementMs) {
-      scheduledVisible = i + 1;
-    }
+  for (const entry of timeline) {
+    if (elapsed >= entry.revealMs) scheduledVisible++;
   }
 
   return instant + scheduledVisible;
@@ -79,22 +117,22 @@ export function getActivePickAnnouncement(
 ): ActivePickAnnouncement | null {
   if (getDropPhase(now, weekKey, slots, runtime) !== "revealing") return null;
 
-  const scheduled = getScheduledSlots(slots);
-  if (scheduled.length === 0) return null;
+  const resolved = resolveTimeline(slots, runtime);
+  if (!resolved) return null;
 
-  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
+  const { timeline, dropStart } = resolved;
   const elapsed = now.getTime() - dropStart.getTime();
-  const pickIndex = Math.floor(elapsed / revealIntervalMs);
 
-  if (pickIndex < 0 || pickIndex >= scheduled.length) return null;
+  for (const entry of timeline) {
+    if (elapsed >= entry.startMs && elapsed < entry.revealMs) {
+      return {
+        slot: entry.slot,
+        year: getDraftYearFromWeekKey(weekKey),
+      };
+    }
+  }
 
-  const pickStart = pickIndex * revealIntervalMs;
-  if (elapsed < pickStart || elapsed >= pickStart + announcementMs) return null;
-
-  return {
-    slot: scheduled[pickIndex],
-    year: getDraftYearFromWeekKey(weekKey),
-  };
+  return null;
 }
 
 export function applyDropReveal(
@@ -121,29 +159,24 @@ export function getSecondsUntilNextReveal(
   now: Date,
   weekKey: string,
   slots: DraftSlot[],
-  revealedCount: number,
+  _revealedCount: number,
   runtime?: Partial<DropRuntime>,
 ): number | null {
   if (getDropPhase(now, weekKey, slots, runtime) !== "revealing") return null;
 
-  const scheduled = getScheduledSlots(slots);
-  const instant = getInstantRevealCount(slots);
-  const scheduledRevealed = revealedCount - instant;
+  const resolved = resolveTimeline(slots, runtime);
+  if (!resolved) return null;
 
-  if (scheduledRevealed >= scheduled.length) return null;
-
-  const { dropStart, revealIntervalMs, announcementMs } = resolveDropRuntime(weekKey, runtime);
+  const { timeline, dropStart } = resolved;
   const elapsed = now.getTime() - dropStart.getTime();
-  const pickStart = scheduledRevealed * revealIntervalMs;
 
-  if (elapsed < pickStart + announcementMs) {
-    return Math.max(0, Math.ceil((pickStart + announcementMs - elapsed) / 1000));
+  for (const entry of timeline) {
+    if (elapsed < entry.revealMs) {
+      return Math.max(0, Math.ceil((entry.revealMs - elapsed) / 1000));
+    }
   }
 
-  const nextPickStart = (scheduledRevealed + 1) * revealIntervalMs;
-  if (scheduledRevealed + 1 >= scheduled.length) return null;
-
-  return Math.max(0, Math.ceil((nextPickStart - elapsed) / 1000));
+  return null;
 }
 
 export { getDropStartFromWeekKey } from "@/lib/drop-runtime";

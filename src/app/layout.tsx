@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "Ogni domenica sera alle 21:00: 30 slot, rivelazione una alla volta. Il draft settimanale KataHero.",
   openGraph: {
     title: "DraftKataHero",
-    description: "30 slot. Ogni domenica. Una card ogni 7 secondi.",
+    description: "30 slot. Ogni domenica. Una card dopo l'intro di ogni pick.",
     type: "website",
   },
 };

@@ -1,5 +1,6 @@
 import type { PlayerProfile } from "@/data/players";
 import type { DraftSlot } from "@/data/players";
+import { DEFAULT_ANNOUNCEMENT_MS } from "@/lib/draft-config";
 
 const ORDINALS: Record<number, string> = {
   1: "1st",
@@ -37,7 +38,7 @@ export function formatPickAnnouncement(
 ): string {
   const pick = getOrdinal(slot);
   const from = getPlayerDraftFrom(player);
-  return `With the ${pick} pick in the ${year} KataHero Draft, KataHero selects ${player.name} from ${from}.`;
+  return `With the ${pick} pick in the ${year} KataHero Draft, KataHero select ${player.name} from ${from}.`;
 }
 
 export function formatPickAnnouncementParts(
@@ -47,9 +48,11 @@ export function formatPickAnnouncementParts(
 ) {
   return {
     lead: `With the ${getOrdinal(slot)} pick in the ${year} KataHero Draft,`,
-    action: "KataHero selects",
+    pickOrdinal: getOrdinal(slot),
+    action: "KataHero select",
     player: player.name,
     from: getPlayerDraftFrom(player),
+    year,
   };
 }
 
@@ -58,7 +61,33 @@ export type ActivePickAnnouncement = {
   year: number;
 };
 
-/** Audio intro per pick specifiche (es. 1pick.m4a per la #1) */
+/** Profilo voce unico (Adam Silver) — en-US-EricNeural, −20%, +5Hz · 14,6s ogni pick */
+export const PICK_VOICE_PROFILE = {
+  voice: "en-US-EricNeural",
+  rate: "-20%",
+  pitch: "+5Hz",
+} as const;
+
+/** Audio intro — stessa voce su tutte le pick */
 export const PICK_ANNOUNCEMENT_AUDIO: Partial<Record<number, string>> = {
   1: "/audio/1pick.m4a",
+  2: "/audio/2pick.m4a",
+  3: "/audio/3pick.m4a",
 };
+
+/** Durata intro fissa (ms) — allineata a 14,6s per ogni pick */
+export const PICK_INTRO_MS = 14_600;
+
+/** Durata intro allineata ai file audio (ms) — lo slot compare a fine intro */
+export const PICK_ANNOUNCEMENT_MS: Partial<Record<number, number>> = {
+  1: PICK_INTRO_MS,
+  2: PICK_INTRO_MS,
+  3: PICK_INTRO_MS,
+};
+
+export function getPickAnnouncementMs(
+  slot: number,
+  fallback: number = DEFAULT_ANNOUNCEMENT_MS,
+): number {
+  return PICK_ANNOUNCEMENT_MS[slot] ?? fallback;
+}

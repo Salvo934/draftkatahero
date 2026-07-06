@@ -34,12 +34,6 @@ export default function SiteHeader() {
           >
             Hall of Fame
           </a>
-          <a
-            href="#cosa-riceverai"
-            className="rounded-full px-3.5 py-2 text-[13px] font-medium text-zinc-400 transition hover:bg-white/10 hover:text-white lg:px-4"
-          >
-            Cosa ricevi
-          </a>
         </nav>
 
         <a

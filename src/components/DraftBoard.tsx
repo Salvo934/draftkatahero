@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import type { DraftBoardState } from "@/lib/draft-board";
 import { loadDraftBoardState } from "@/lib/draft-board";
 import { SLOT_COUNT } from "@/lib/draft-config";
-import { createSimulationRuntime, type DropRuntime } from "@/lib/drop-runtime";
 import {
   applyDropReveal,
   getActivePickAnnouncement,
@@ -12,24 +11,41 @@ import {
   getSecondsUntilNextReveal,
 } from "@/lib/drop-reveal";
 import { buildSimulationSlots, SIMULATION_PICK_COUNT } from "@/lib/draft-simulation";
+import {
+  advanceSimulationAfterIntro,
+  applySimulationReveal,
+  BETWEEN_PICKS_MS,
+  createSimulationPlayback,
+  startNextSimulationIntro,
+  type SimulationPlayback,
+} from "@/lib/simulation-playback";
 import DraftPickAnnouncement from "./DraftPickAnnouncement";
 import PlayerCard from "./PlayerCard";
 import PickedCarousel, { HallOfFameCta } from "./PickedCarousel";
 
-type SimulationState = {
-  slots: ReturnType<typeof buildSimulationSlots>;
-  runtime: DropRuntime;
-};
-
-function DiscoverGrid({ slots }: { slots: DraftBoardState["discoverSlots"] }) {
+function DiscoverGrid({
+  slots,
+  activeAnnouncement,
+  onIntroComplete,
+}: {
+  slots: DraftBoardState["discoverSlots"];
+  activeAnnouncement: ReturnType<typeof getActivePickAnnouncement>;
+  onIntroComplete?: () => void;
+}) {
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5 xl:gap-5">
       {slots.map((draftSlot) => (
         <div
           key={`${draftSlot.slot}-${draftSlot.player?.slug ?? "empty"}`}
-          className={draftSlot.player ? "slot-drop-reveal" : undefined}
+          className={`relative ${draftSlot.player ? "slot-drop-reveal" : ""}`}
         >
           <PlayerCard slot={draftSlot} />
+          {activeAnnouncement?.slot.slot === draftSlot.slot && (
+            <DraftPickAnnouncement
+              announcement={activeAnnouncement}
+              onComplete={onIntroComplete}
+            />
+          )}
         </div>
       ))}
     </div>
@@ -75,7 +91,7 @@ function SectionHeader({
 export default function DraftBoard() {
   const [board, setBoard] = useState<DraftBoardState | null>(null);
   const [now, setNow] = useState(() => new Date());
-  const [simulation, setSimulation] = useState<SimulationState | null>(null);
+  const [simPlayback, setSimPlayback] = useState<SimulationPlayback | null>(null);
 
   useEffect(() => {
     setBoard(loadDraftBoardState());
@@ -89,54 +105,75 @@ export default function DraftBoard() {
   }, []);
 
   useEffect(() => {
-    const ms = simulation ? 250 : 1000;
-    const clockId = setInterval(() => setNow(new Date()), ms);
+    if (simPlayback) return;
+    const clockId = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(clockId);
-  }, [simulation]);
+  }, [simPlayback]);
+
+  useEffect(() => {
+    if (!simPlayback?.awaitingNextIntro) return;
+
+    const id = setTimeout(() => {
+      setSimPlayback((prev) =>
+        prev ? startNextSimulationIntro(prev, board?.weekKey ?? "") : null,
+      );
+    }, BETWEEN_PICKS_MS);
+
+    return () => clearTimeout(id);
+  }, [simPlayback?.awaitingNextIntro, board?.weekKey]);
 
   const startSimulation = useCallback(() => {
-    const start = new Date();
-    setSimulation({
-      slots: buildSimulationSlots(),
-      runtime: createSimulationRuntime(start),
-    });
-    setNow(start);
-    document.getElementById("board")?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+    const slots = buildSimulationSlots();
+    setSimPlayback(createSimulationPlayback(slots, board?.weekKey ?? ""));
+  }, [board?.weekKey]);
 
   const stopSimulation = useCallback(() => {
-    setSimulation(null);
+    setSimPlayback(null);
   }, []);
 
-  const sourceSlots = simulation?.slots ?? board?.discoverSlots ?? [];
-  const dropRuntime = simulation?.runtime;
+  const handleIntroComplete = useCallback(() => {
+    setSimPlayback((prev) => (prev ? advanceSimulationAfterIntro(prev) : null));
+  }, []);
+
+  const isSimulating = Boolean(simPlayback);
+  const sourceSlots = simPlayback?.slots ?? board?.discoverSlots ?? [];
   const weekKey = board?.weekKey ?? "";
-  const isSimulating = Boolean(simulation);
 
   const filledCount = sourceSlots.filter((s) => s.player).length;
-  const displaySlots = useMemo(
-    () =>
-      board || simulation
-        ? applyDropReveal(sourceSlots, now, weekKey, dropRuntime)
-        : [],
-    [board, simulation, sourceSlots, now, weekKey, dropRuntime],
-  );
+
+  const displaySlots = useMemo(() => {
+    if (!board && !simPlayback) return [];
+    if (simPlayback) {
+      return applySimulationReveal(simPlayback.slots, simPlayback.revealedSlots);
+    }
+    return applyDropReveal(sourceSlots, now, weekKey);
+  }, [board, simPlayback, sourceSlots, now, weekKey]);
+
   const visibleCount = displaySlots.filter((s) => s.player).length;
-  const dropPhase =
-    board || simulation ? getDropPhase(now, weekKey, sourceSlots, dropRuntime) : "pre";
-  const activeAnnouncement =
-    board || simulation
-      ? getActivePickAnnouncement(now, weekKey, sourceSlots, dropRuntime)
+
+  const dropPhase = simPlayback
+    ? simPlayback.done
+      ? "post"
+      : "revealing"
+    : board
+      ? getDropPhase(now, weekKey, sourceSlots)
+      : "pre";
+
+  const activeAnnouncement = simPlayback
+    ? simPlayback.activeAnnouncement
+    : board
+      ? getActivePickAnnouncement(now, weekKey, sourceSlots)
       : null;
+
   const nextRevealIn =
-    board || simulation
-      ? getSecondsUntilNextReveal(now, weekKey, sourceSlots, visibleCount, dropRuntime)
+    !simPlayback && board
+      ? getSecondsUntilNextReveal(now, weekKey, sourceSlots, visibleCount)
       : null;
+
   const pickedCount = board?.pickedSlots.length ?? 0;
 
   return (
     <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-24 pt-10 sm:px-6 lg:px-8">
-      {activeAnnouncement && <DraftPickAnnouncement announcement={activeAnnouncement} />}
       <section id="board" className="scroll-mt-28">
         <div className="pointer-events-none absolute inset-x-4 top-10 h-px bg-linear-to-r from-transparent via-white/10 to-transparent sm:inset-x-6 lg:inset-x-8" />
 
@@ -153,9 +190,8 @@ export default function DraftBoard() {
                     <>
                       {" "}
                       · Simulazione drop: {visibleCount}/{filledCount} pick
-                      {dropPhase === "revealing" && nextRevealIn !== null && nextRevealIn > 0 && (
-                        <> · prossimo tra {nextRevealIn}s</>
-                      )}
+                      {activeAnnouncement && <> · annuncio in corso</>}
+                      {simPlayback?.awaitingNextIntro && <> · prossimo annuncio…</>}
                       {dropPhase === "post" && <> · simulazione completata</>}
                     </>
                   ) : (
@@ -211,7 +247,15 @@ export default function DraftBoard() {
           )}
         </div>
 
-        {!board ? <BoardSkeleton /> : <DiscoverGrid slots={displaySlots} />}
+        {!board ? (
+          <BoardSkeleton />
+        ) : (
+          <DiscoverGrid
+            slots={displaySlots}
+            activeAnnouncement={activeAnnouncement}
+            onIntroComplete={isSimulating ? handleIntroComplete : undefined}
+          />
+        )}
       </section>
 
       <section id="rivelate" className="mt-16 scroll-mt-28 border-t border-white/8 pt-10">

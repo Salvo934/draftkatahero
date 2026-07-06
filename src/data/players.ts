@@ -59,11 +59,10 @@ const ilarioProfile: PlayerProfile = {
   playerCardUrl: "https://ilariosimonetti7.katahero.com",
 };
 
-/** Prossimo draft — pick #1 già fatta */
+/** Prossimo draft — pick #1 in arrivo al drop (nascosta fino a fine intro) */
 export const discoverSlots: DraftSlot[] = Array.from({ length: SLOT_COUNT }, (_, i) => ({
   slot: i + 1,
   player: i === 0 ? ilarioProfile : null,
-  revealed: i === 0 ? true : undefined,
 }));
 
 /** Hall of Fame — si popola dopo ogni rollover con la pick #1 della settimana */

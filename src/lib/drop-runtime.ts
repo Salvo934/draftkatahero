@@ -1,14 +1,7 @@
-import {
-  ANNOUNCEMENT_MS,
-  DROP_HOUR,
-  REVEAL_INTERVAL_MS,
-  SIMULATION_ANNOUNCEMENT_MS,
-  SIMULATION_REVEAL_INTERVAL_MS,
-} from "@/lib/draft-config";
+import { DEFAULT_ANNOUNCEMENT_MS, DROP_HOUR, SIMULATION_ANNOUNCEMENT_MS } from "@/lib/draft-config";
 
 export type DropRuntime = {
   dropStart: Date;
-  revealIntervalMs: number;
   announcementMs: number;
 };
 
@@ -20,15 +13,13 @@ export function getDropStartFromWeekKey(weekKey: string): Date {
 export function createProductionRuntime(weekKey: string): DropRuntime {
   return {
     dropStart: getDropStartFromWeekKey(weekKey),
-    revealIntervalMs: REVEAL_INTERVAL_MS,
-    announcementMs: ANNOUNCEMENT_MS,
+    announcementMs: DEFAULT_ANNOUNCEMENT_MS,
   };
 }
 
 export function createSimulationRuntime(start = new Date()): DropRuntime {
   return {
     dropStart: start,
-    revealIntervalMs: SIMULATION_REVEAL_INTERVAL_MS,
     announcementMs: SIMULATION_ANNOUNCEMENT_MS,
   };
 }
@@ -39,7 +30,6 @@ export function resolveDropRuntime(
 ): DropRuntime {
   return {
     dropStart: runtime?.dropStart ?? getDropStartFromWeekKey(weekKey),
-    revealIntervalMs: runtime?.revealIntervalMs ?? REVEAL_INTERVAL_MS,
-    announcementMs: runtime?.announcementMs ?? ANNOUNCEMENT_MS,
+    announcementMs: runtime?.announcementMs ?? DEFAULT_ANNOUNCEMENT_MS,
   };
 }

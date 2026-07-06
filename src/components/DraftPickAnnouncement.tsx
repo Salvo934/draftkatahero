@@ -1,33 +1,58 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import type { ActivePickAnnouncement } from "@/lib/draft-announcement";
 import {
   formatPickAnnouncementParts,
+  getPickAnnouncementMs,
   PICK_ANNOUNCEMENT_AUDIO,
 } from "@/lib/draft-announcement";
 
 type DraftPickAnnouncementProps = {
   announcement: ActivePickAnnouncement;
+  onComplete?: () => void;
 };
 
-export default function DraftPickAnnouncement({ announcement }: DraftPickAnnouncementProps) {
+export default function DraftPickAnnouncement({
+  announcement,
+  onComplete,
+}: DraftPickAnnouncementProps) {
   const { slot, year } = announcement;
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const onCompleteRef = useRef(onComplete);
+  const completedRef = useRef(false);
+
+  onCompleteRef.current = onComplete;
 
   useEffect(() => {
+    completedRef.current = false;
+    let cancelled = false;
+
+    const finish = () => {
+      if (cancelled || completedRef.current) return;
+      completedRef.current = true;
+      onCompleteRef.current?.();
+    };
+
     const src = PICK_ANNOUNCEMENT_AUDIO[slot.slot];
-    if (!src) return;
+    if (!src) {
+      const timer = setTimeout(finish, getPickAnnouncementMs(slot.slot));
+      return () => {
+        cancelled = true;
+        clearTimeout(timer);
+      };
+    }
 
     const audio = new Audio(src);
-    audioRef.current = audio;
-    void audio.play().catch(() => {});
+    audio.addEventListener("ended", finish);
+    audio.addEventListener("error", finish);
+    void audio.play().catch(finish);
 
     return () => {
+      cancelled = true;
       audio.pause();
       audio.currentTime = 0;
-      audioRef.current = null;
+      audio.removeEventListener("ended", finish);
+      audio.removeEventListener("error", finish);
     };
   }, [slot.slot, slot.player?.slug]);
 
@@ -35,38 +60,36 @@ export default function DraftPickAnnouncement({ announcement }: DraftPickAnnounc
 
   const parts = formatPickAnnouncementParts(slot.slot, slot.player, year);
 
-  return createPortal(
+  return (
     <div
-      className="fixed inset-0 z-9998 flex items-center justify-center bg-black/95 p-4 backdrop-blur-xl"
+      className="slot-pick-intro absolute inset-0 z-20 flex flex-col items-center justify-center rounded-xl border border-accent/35 bg-black/92 p-3 text-center shadow-[0_0_32px_-8px_rgba(0,229,160,0.45)] backdrop-blur-sm"
       role="status"
       aria-live="assertive"
       aria-label={`Pick ${slot.slot}: ${slot.player.name}`}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,229,160,0.12)_0%,transparent_65%)]" />
+      <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-accent sm:text-[10px]">
+        On the clock
+      </p>
 
-      <div className="relative w-full max-w-3xl animate-[popup-in_0.45s_ease-out] text-center">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-accent sm:text-xs">
-          On the clock
-        </p>
-
-        <p className="mt-6 font-display text-lg font-semibold leading-relaxed text-zinc-300 sm:text-2xl md:text-[1.65rem]">
-          {parts.lead}
-        </p>
-
-        <p className="mt-8 font-display text-2xl font-bold uppercase leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
-          {parts.action}{" "}
-          <span className="text-gradient-accent">{parts.player}</span>
-        </p>
-
-        <p className="mt-5 text-base font-medium text-zinc-400 sm:text-xl">
-          from <span className="font-semibold text-zinc-200">{parts.from}</span>
-        </p>
-
-        <div className="mx-auto mt-10 flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-accent/10">
-          <span className="font-display text-2xl font-bold text-accent">#{slot.slot}</span>
-        </div>
+      <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-lg border border-accent/30 bg-accent/10 sm:h-11 sm:w-11">
+        <span className="font-display text-lg font-bold text-accent sm:text-xl">#{slot.slot}</span>
       </div>
-    </div>,
-    document.body,
+
+      <p className="mt-3 line-clamp-3 text-[10px] leading-snug text-zinc-400 sm:text-[11px]">
+        {parts.lead}
+      </p>
+
+      <p className="mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-500 sm:text-[10px]">
+        {parts.action}
+      </p>
+
+      <p className="mt-1 font-display text-sm font-bold leading-tight text-white sm:text-base">
+        {parts.player}
+      </p>
+
+      <p className="mt-1 line-clamp-2 text-[10px] text-zinc-500 sm:text-[11px]">
+        from {parts.from}
+      </p>
+    </div>
   );
 }
