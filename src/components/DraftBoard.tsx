@@ -10,7 +10,7 @@ import {
   getSecondsUntilNextReveal,
 } from "@/lib/drop-reveal";
 import PlayerCard from "./PlayerCard";
-import PickedCarousel from "./PickedCarousel";
+import PickedCarousel, { HallOfFameCta } from "./PickedCarousel";
 
 function DiscoverGrid({ slots }: { slots: DraftBoardState["discoverSlots"] }) {
   return (
@@ -135,13 +135,14 @@ export default function DraftBoard() {
       <section id="rivelate" className="mt-16 scroll-mt-28 border-t border-white/8 pt-10">
         <SectionHeader
           eyebrow="Archivio permanente"
-          title="Rivelate"
+          title="Hall of Fame"
           description={
             <>
-              Scorri il carosello o cerca per nome — i talenti restano qui per sempre.
+              Solo la pick #1 di ogni draft settimanale resta qui per sempre — le prime scelte
+              della storia DraftKataHero.
               {pickedCount > 0 && (
                 <span className="ml-1 font-semibold text-zinc-300">
-                  {pickedCount} talent{pickedCount === 1 ? "o" : "i"} in archivio.
+                  {pickedCount} pick #1 in archivio.
                 </span>
               )}
             </>
@@ -158,13 +159,19 @@ export default function DraftBoard() {
             ))}
           </div>
         ) : pickedCount > 0 ? (
-          <PickedCarousel slots={board.pickedSlots} />
+          <>
+            <PickedCarousel slots={board.pickedSlots} />
+            <HallOfFameCta />
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-white/10 bg-white/2 px-6 py-16 text-center">
-            <p className="font-display text-lg font-bold text-zinc-500">Nessun talento rivelato</p>
+            <p className="font-display text-lg font-bold text-zinc-500">Hall of Fame vuota</p>
             <p className="mt-2 max-w-sm text-sm text-zinc-600">
-              Al termine della prima domenica, i giocatori scoperti compariranno qui.
+              Dopo ogni domenica, la pick #1 del draft entra qui per sempre.
             </p>
+            <div className="mt-6 w-full max-w-lg">
+              <HallOfFameCta />
+            </div>
           </div>
         )}
       </section>

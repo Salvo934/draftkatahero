@@ -41,8 +41,8 @@ export default function Hero() {
 
         <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-zinc-400 sm:text-lg">
           Clicca sulla card per aprire la player card dell&apos;atleta.
-          Ogni domenica alle 21:00 le card si rivelano una alla volta — a fine settimana
-          passano in Rivelate e si aprono {SLOT_COUNT} nuovi slot.
+          Ogni domenica alle 21:00 le card si rivelano una alla volta — la pick #1 passa in
+          Hall of Fame e si aprono {SLOT_COUNT} nuovi slot.
         </p>
 
         {/* Stats */}

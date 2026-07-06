@@ -50,7 +50,10 @@ export function applyDropReveal(
   const revealCount = getRevealedPlayerCount(now, weekKey, filled.length);
   const revealed = new Set(filled.slice(0, revealCount).map((s) => s.slot));
 
-  return slots.map((s) => (revealed.has(s.slot) ? s : { ...s, player: null }));
+  return slots.map((s) => {
+    if (s.revealed && s.player) return s;
+    return revealed.has(s.slot) ? s : { ...s, player: null };
+  });
 }
 
 export function getSecondsUntilNextReveal(

@@ -1,6 +1,7 @@
 import type { DraftSlot } from "@/data/players";
 import { discoverSlots as seedDiscover, pickedSlots as seedPicked } from "@/data/players";
 import { createEmptySlots, formatWeekLabel, getCurrentPeriodWeekKey } from "@/lib/draft-cycle";
+import { extractWeeklyFirstPick } from "@/lib/hall-of-fame";
 import { SLOT_COUNT } from "@/lib/draft-config";
 
 type StoredBoard = {
@@ -10,7 +11,7 @@ type StoredBoard = {
   pickedSlots: DraftSlot[];
 };
 
-const STORAGE_KEY = "draftkatahero-board-v5";
+const STORAGE_KEY = "draftkatahero-board-v7";
 
 function readStorage(): StoredBoard | null {
   if (typeof window === "undefined") return null;
@@ -27,10 +28,15 @@ function writeStorage(board: StoredBoard): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(board));
 }
 
-function mergeDiscoverSlots(stored: DraftSlot[]): DraftSlot[] {
+function mergeDiscoverSlots(stored: DraftSlot[], picked: DraftSlot[]): DraftSlot[] {
+  const archivedSlugs = new Set(
+    [...picked, ...seedPicked].map((s) => s.player?.slug).filter(Boolean) as string[],
+  );
   const bySlot = new Map(stored.map((s) => [s.slot, s]));
   for (const seed of seedDiscover) {
-    if (seed.player) bySlot.set(seed.slot, seed);
+    if (seed.player && !archivedSlugs.has(seed.player.slug)) {
+      bySlot.set(seed.slot, seed);
+    }
   }
   return Array.from({ length: SLOT_COUNT }, (_, i) => bySlot.get(i + 1) ?? { slot: i + 1, player: null });
 }
@@ -51,23 +57,27 @@ function mergePickedSlots(stored: DraftSlot[]): DraftSlot[] {
 }
 
 function rollover(stored: StoredBoard, newWeekKey: string): StoredBoard {
-  const newlyPicked = stored.discoverSlots.filter((s) => s.player !== null);
-  const pickedSlots = mergePickedSlots([...stored.pickedSlots, ...newlyPicked]);
+  const firstPick = extractWeeklyFirstPick(stored.discoverSlots, stored.weekKey);
+  const pickedSlots = mergePickedSlots([
+    ...stored.pickedSlots,
+    ...(firstPick ? [firstPick] : []),
+  ]);
 
   return {
     version: 2,
     weekKey: newWeekKey,
-    discoverSlots: createEmptySlots(),
+    discoverSlots: mergeDiscoverSlots(createEmptySlots(), pickedSlots),
     pickedSlots,
   };
 }
 
 function initBoard(weekKey: string): StoredBoard {
+  const pickedSlots = mergePickedSlots(seedPicked);
   return {
     version: 2,
     weekKey,
-    discoverSlots: mergeDiscoverSlots(createEmptySlots()),
-    pickedSlots: mergePickedSlots(seedPicked),
+    discoverSlots: mergeDiscoverSlots(createEmptySlots(), pickedSlots),
+    pickedSlots,
   };
 }
 
@@ -91,10 +101,11 @@ export function loadDraftBoardState(): DraftBoardState {
     board = rollover(board, weekKey);
     writeStorage(board);
   } else {
+    const pickedSlots = mergePickedSlots(board.pickedSlots);
     board = {
       ...board,
-      discoverSlots: mergeDiscoverSlots(board.discoverSlots),
-      pickedSlots: mergePickedSlots(board.pickedSlots),
+      discoverSlots: mergeDiscoverSlots(board.discoverSlots, pickedSlots),
+      pickedSlots,
     };
     writeStorage(board);
   }

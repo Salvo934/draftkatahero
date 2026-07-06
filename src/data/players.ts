@@ -1,11 +1,11 @@
 import { SLOT_COUNT } from "@/lib/draft-config";
 
 /**
- * Due sezioni separate:
- * - `discoverSlots` → slot "Da scoprire" (prossima domenica)
- * - `pickedSlots` → talenti "Rivelate" (restano permanentemente)
+ * - `discoverSlots` → prossima domenica (max 30 giocatori)
+ * - `pickedSlots` → Hall of Fame: solo la pick #1 di ogni settimana
  *
- * Aggiungi `cardImage` per la player card grafica (lightbox al click).
+ * Dopo ogni draft: sposta solo slot #1 in pickedSlots, svuota discover.
+ * Gli altri atleti contattano katahero.com o Instagram per la propria scheda.
  */
 
 export type PlayerProfile = {
@@ -24,6 +24,8 @@ export type PlayerProfile = {
   photo?: string;
   teamLogo?: string;
   cardImage?: string;
+  /** Se true, la player card è visibile solo in anteprima — versione completa su KataHero */
+  cardLocked?: boolean;
   playerCardUrl?: string;
   seasonStats?: {
     season: string;
@@ -36,34 +38,35 @@ export type PlayerProfile = {
 export type DraftSlot = {
   slot: number;
   player: PlayerProfile | null;
+  /** Hall of Fame: settimana in cui è stata pick #1 */
+  draftWeekLabel?: string;
+  /** Prima scelta già rivelata — visibile subito, indipendentemente dal countdown del drop */
+  revealed?: boolean;
 };
 
-/** Slot da scoprire — si azzerano ogni lunedì, i giocatori passano in Rivelate */
-export const discoverSlots: DraftSlot[] = [
-  {
-    slot: 1,
-    player: {
-      slug: "ilario-simonetti",
-      name: "Ilario Simonetti",
-      position: "Ala piccola",
-      team: "Benacquista Assicurazioni Latina",
-      country: "Italia",
-      height: "200 cm",
-      birthYear: "2004",
-      category: "Serie B",
-      availability: "Disponibile",
-      photo: "/players/ilario-simonetti.jpg",
-      cardImage: "/players/ilario-card.png",
-      playerCardUrl: "https://ilariosimonetti7.katahero.com",
-    },
-  },
-  ...Array.from({ length: SLOT_COUNT - 1 }, (_, i) => ({
-    slot: i + 2,
-    player: null as PlayerProfile | null,
-  })),
-];
+const ilarioProfile: PlayerProfile = {
+  slug: "ilario-simonetti",
+  name: "Ilario Simonetti",
+  position: "Ala piccola",
+  team: "Benacquista Assicurazioni Latina",
+  country: "Italia",
+  height: "200 cm",
+  birthYear: "2004",
+  category: "Serie B",
+  availability: "Disponibile",
+  photo: "/players/ilario-simonetti.jpg",
+  cardImage: "/players/ilario-card.png",
+  playerCardUrl: "https://ilariosimonetti7.katahero.com",
+};
 
-/** Talent rivelati — restano sempre in sezione Rivelate */
+/** Prossimo draft — pick #1 già fatta */
+export const discoverSlots: DraftSlot[] = Array.from({ length: SLOT_COUNT }, (_, i) => ({
+  slot: i + 1,
+  player: i === 0 ? ilarioProfile : null,
+  revealed: i === 0 ? true : undefined,
+}));
+
+/** Hall of Fame — si popola dopo ogni rollover con la pick #1 della settimana */
 export const pickedSlots: DraftSlot[] = [];
 
 export function getPlayerCardImage(player: PlayerProfile): string | undefined {
