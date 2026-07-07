@@ -38,7 +38,7 @@ export function formatPickAnnouncement(
 ): string {
   const pick = getOrdinal(slot);
   const from = getPlayerDraftFrom(player);
-  return `With the ${pick} pick in the ${year} KataHero Draft, KataHero select ${player.name} from ${from}.`;
+  return `With the ${pick} pick in the ${year} KataHero Draft, KataHero selects ${player.name} from ${from}.`;
 }
 
 export function formatPickAnnouncementParts(
@@ -49,7 +49,7 @@ export function formatPickAnnouncementParts(
   return {
     lead: `With the ${getOrdinal(slot)} pick in the ${year} KataHero Draft,`,
     pickOrdinal: getOrdinal(slot),
-    action: "KataHero select",
+    action: "KataHero selects",
     player: player.name,
     from: getPlayerDraftFrom(player),
     year,
