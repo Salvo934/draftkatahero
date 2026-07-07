@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { DraftSlot, PlayerProfile } from "@/data/players";
 import {
   getPlayerCardImage,
@@ -34,6 +34,7 @@ function EmptySlot({ slot }: { slot: number }) {
 
 function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
   const [revealed, setRevealed] = useState(false);
+  const ignoreClickUntil = useRef(0);
   const cardImage = getPlayerCardImage(player);
   const externalUrl = getPlayerCardUrl(player);
   const cardLocked = isPlayerCardLocked(player);
@@ -47,6 +48,7 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
     .toUpperCase();
 
   function handleClick() {
+    if (Date.now() < ignoreClickUntil.current) return;
     if (cardImage) {
       setRevealed(true);
       return;
@@ -54,6 +56,11 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
     if (externalUrl) {
       window.open(externalUrl, "_blank", "noopener,noreferrer");
     }
+  }
+
+  function handleCloseReveal() {
+    ignoreClickUntil.current = Date.now() + 450;
+    setRevealed(false);
   }
 
   const card = (
@@ -113,8 +120,9 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
         <PlayerCardReveal
           name={player.name}
           image={cardImage}
+          playerSlug={player.slug}
           locked={cardLocked}
-          onClose={() => setRevealed(false)}
+          onClose={handleCloseReveal}
         />
       )}
     </>

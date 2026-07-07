@@ -18,6 +18,7 @@ export const LEGAL_LINKS = [
   { href: "/cookie", label: "Cookie" },
   { href: "/termini", label: "Termini" },
   { href: "/note-legali", label: "Note legali" },
+  { href: "/pagamenti", label: "Pagamenti" },
 ] as const;
 
 export const LOCAL_STORAGE_ITEMS = [

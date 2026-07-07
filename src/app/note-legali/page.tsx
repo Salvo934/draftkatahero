@@ -99,6 +99,11 @@ export default function NoteLegaliPage() {
             </Link>
           </li>
           <li>
+            <Link href="/pagamenti" className="text-accent underline-offset-2 hover:underline">
+              Pagamenti e abbonamenti
+            </Link>
+          </li>
+          <li>
             <a
               href={LEGAL.parentPrivacyUrl}
               target="_blank"

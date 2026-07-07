@@ -1,21 +1,31 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  type PointerEvent as ReactPointerEvent,
+} from "react";
 import { createPortal } from "react-dom";
-import { KATAHERO_PURCHASE_URL } from "@/lib/card-view";
+import {
+  getPlayerCardCheckoutUrl,
+  PLAYER_CARD_PRICE,
+  PLAYER_CARD_PRICE_PERIOD,
+} from "@/lib/card-view";
 
 type PlayerCardRevealProps = {
   name: string;
   image: string;
+  playerSlug?: string;
   locked?: boolean;
-  purchaseUrl?: string;
+  checkoutUrl?: string;
   onClose: () => void;
 };
 
-function LockIcon() {
+function LockIcon({ className = "h-7 w-7" }: { className?: string }) {
   return (
     <svg
-      className="h-8 w-8 text-accent"
+      className={`${className} text-accent`}
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -31,17 +41,116 @@ function LockIcon() {
   );
 }
 
+function CheckIcon() {
+  return (
+    <svg className="h-3 w-3 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+  );
+}
+
+const PURCHASE_BENEFITS = [
+  { title: "Card HD", detail: "Social e scout" },
+  { title: "Profilo atleta premium", detail: "Scout e club" },
+  { title: "Link personale", detail: "Subito tuo" },
+] as const;
+
+function UnlockCta({ payUrl, className = "" }: { payUrl: string; className?: string }) {
+  return (
+    <div className={className}>
+      <div className="rounded-xl border border-white/8 bg-black/35 px-3 py-2.5 text-center">
+        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-zinc-500">
+          Sblocco completo
+        </p>
+        <p className="mt-0.5 font-display text-xl font-bold leading-none text-white sm:text-2xl">
+          {PLAYER_CARD_PRICE}
+          {PLAYER_CARD_PRICE_PERIOD ? (
+            <span className="ml-0.5 text-sm font-semibold text-zinc-400">
+              {PLAYER_CARD_PRICE_PERIOD}
+            </span>
+          ) : null}
+        </p>
+      </div>
+
+      <a
+        href={payUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onPointerDown={(e) => e.stopPropagation()}
+        className="mt-2.5 flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-4 py-3 text-sm font-bold text-black shadow-[0_0_32px_-8px_rgba(0,229,160,0.55)] active:scale-[0.98] sm:mt-3"
+      >
+        Sblocca la tua player card
+      </a>
+
+      <p className="mt-2 text-[10px] leading-snug text-zinc-600">
+        Pagamento sicuro con Stripe · Nessuna sorpresa al checkout
+      </p>
+    </div>
+  );
+}
+
+function PurchasePanel({ payUrl }: { payUrl: string }) {
+  return (
+    <div className="shrink-0 rounded-2xl border border-white/10 bg-linear-to-b from-zinc-900/95 to-black px-3.5 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] sm:px-4 sm:py-4">
+      <div className="text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+          Pick ufficiale · DraftKataHero
+        </p>
+        <h2 className="mt-2 font-display text-base font-bold leading-snug text-white sm:text-lg">
+          Falla lavorare per te
+        </h2>
+      </div>
+
+      <div className="mt-3 grid grid-cols-3 gap-2 sm:mt-3.5">
+        {PURCHASE_BENEFITS.map((item) => (
+          <div
+            key={item.title}
+            className="flex min-h-22 flex-col items-center justify-center rounded-xl border border-white/8 bg-white/4 px-1.5 py-2 text-center sm:min-h-23 sm:px-2"
+          >
+            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-accent/15">
+              <CheckIcon />
+            </span>
+            <p className="mt-1.5 line-clamp-2 text-[9px] font-semibold leading-tight text-zinc-100 sm:text-[10px]">
+              {item.title}
+            </p>
+            <p className="mt-1 text-[9px] leading-snug text-zinc-500 sm:text-[10px]">{item.detail}</p>
+          </div>
+        ))}
+      </div>
+
+      <UnlockCta payUrl={payUrl} className="mt-3.5 sm:mt-4" />
+    </div>
+  );
+}
+
 export default function PlayerCardReveal({
   name,
   image,
+  playerSlug,
   locked = false,
-  purchaseUrl = KATAHERO_PURCHASE_URL,
+  checkoutUrl,
   onClose,
 }: PlayerCardRevealProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
   const closeNow = useCallback(() => {
     document.body.style.overflow = "";
+    if (rootRef.current) {
+      rootRef.current.style.display = "none";
+    }
     onClose();
   }, [onClose]);
+
+  const handleClosePointer = useCallback(
+    (e: ReactPointerEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      closeNow();
+    },
+    [closeNow],
+  );
+
+  const firstName = name.split(" ")[0];
+  const payUrl = checkoutUrl ?? getPlayerCardCheckoutUrl(playerSlug);
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -57,7 +166,8 @@ export default function PlayerCardReveal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 flex touch-manipulation items-center justify-center p-4 sm:p-6"
+      ref={rootRef}
+      className="fixed inset-0 z-9999 flex touch-manipulation flex-col overflow-hidden px-3 pt-[max(0.75rem,env(safe-area-inset-top))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4"
       role="dialog"
       aria-modal="true"
       aria-label={locked ? `Anteprima player card di ${name}` : `Player card di ${name}`}
@@ -69,74 +179,57 @@ export default function PlayerCardReveal({
         aria-label="Chiudi"
       />
 
-      <div className="relative z-10 flex w-full max-w-[min(92vw,22rem)] flex-col items-center sm:max-w-[24rem]">
+      <div
+        className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-[min(94vw,26rem)] flex-col gap-2.5 sm:max-w-md"
+        onPointerDown={(e) => e.stopPropagation()}
+      >
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            closeNow();
-          }}
-          className="absolute -top-1 -right-1 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-2xl leading-none text-white active:scale-95 sm:-right-3"
+          onPointerDown={handleClosePointer}
+          className="absolute -top-0.5 right-0 z-30 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-2xl leading-none text-white select-none"
           aria-label="Chiudi player card"
         >
           ×
         </button>
 
-        <div className="relative w-full overflow-hidden rounded-2xl">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={image}
-            alt={locked ? `Anteprima sfocata — ${name}` : `Player card — ${name}`}
-            className={`w-full object-contain ${locked ? "scale-105 blur-xl brightness-75" : ""}`}
-            decoding="async"
-          />
+        <div className="relative flex min-h-0 flex-1 items-center justify-center">
+          <div className="relative flex h-full max-h-[min(58dvh,34rem)] w-full items-center justify-center overflow-hidden rounded-2xl border border-white/8 bg-black/40">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={image}
+              alt={locked ? `Anteprima player card — ${name}` : `Player card — ${name}`}
+              className={`max-h-full max-w-full object-contain ${
+                locked ? "blur-[6px] brightness-95 saturate-90 transform-[translateZ(0)]" : ""
+              }`}
+              decoding="async"
+            />
 
-          {locked && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/35 px-6 text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-accent/30 bg-black/60">
-                <LockIcon />
+            {locked && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/25 px-4 text-center">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-accent/30 bg-black/60 sm:h-12 sm:w-12">
+                  <LockIcon className="h-6 w-6 sm:h-7 sm:w-7" />
+                </div>
+                <p className="mt-2.5 font-display text-xs font-bold uppercase tracking-wide text-white sm:text-sm">
+                  {firstName}, sei stato scelto
+                </p>
+                <p className="mt-1 max-w-56 text-[11px] leading-snug text-zinc-300">
+                  La tua player card KataHero ti aspetta.
+                </p>
               </div>
-              <p className="mt-4 font-display text-sm font-bold uppercase tracking-wide text-white">
-                Anteprima sfocata
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-zinc-300">
-                La versione completa si sblocca con l&apos;acquisto su KataHero.
-              </p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        <div className="mt-5 w-full text-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
-            {locked ? "Player card · preview" : "Player card"}
-          </p>
-
-          {locked ? (
-            <>
-              <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-                Dopo il pagamento ti invieremo un link personale con la tua player card in alta
-                qualità e il badge sportivo KataHero — da usare come preferisci.
-              </p>
-              <a
-                href={purchaseUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-4 inline-flex min-h-11 min-w-[200px] items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black active:scale-[0.98]"
-              >
-                Sblocca su KataHero
-              </a>
-            </>
-          ) : (
-            <a
-              href={purchaseUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex min-h-11 min-w-[200px] items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black active:scale-[0.98]"
-            >
-              Sblocca la tua player card
-            </a>
-          )}
-        </div>
+        {locked ? (
+          <PurchasePanel payUrl={payUrl} />
+        ) : (
+          <div className="shrink-0 rounded-2xl border border-white/10 bg-zinc-900/95 px-4 py-4">
+            <p className="text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+              Player card
+            </p>
+            <UnlockCta payUrl={payUrl} className="mt-3" />
+          </div>
+        )}
       </div>
     </div>,
     document.body,
