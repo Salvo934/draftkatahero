@@ -4,7 +4,8 @@ import {
   useCallback,
   useEffect,
   useRef,
-  type PointerEvent as ReactPointerEvent,
+  type MouseEvent,
+  type TouchEvent,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -76,7 +77,8 @@ function UnlockCta({ payUrl, className = "" }: { payUrl: string; className?: str
         href={payUrl}
         target="_blank"
         rel="noopener noreferrer"
-        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         className="mt-2.5 flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-4 py-3 text-sm font-bold text-black shadow-[0_0_32px_-8px_rgba(0,229,160,0.55)] active:scale-[0.98] sm:mt-3"
       >
         Sblocca la tua player card
@@ -123,6 +125,14 @@ function PurchasePanel({ payUrl }: { payUrl: string }) {
   );
 }
 
+function hideModalRoot(el: HTMLElement | null) {
+  if (!el) return;
+  el.style.setProperty("display", "none", "important");
+  el.style.setProperty("visibility", "hidden", "important");
+  el.style.setProperty("opacity", "0", "important");
+  el.style.setProperty("pointer-events", "none", "important");
+}
+
 export default function PlayerCardReveal({
   name,
   image,
@@ -132,17 +142,26 @@ export default function PlayerCardReveal({
   onClose,
 }: PlayerCardRevealProps) {
   const rootRef = useRef<HTMLDivElement>(null);
+  const closedRef = useRef(false);
+  const onCloseRef = useRef(onClose);
+
+  onCloseRef.current = onClose;
 
   const closeNow = useCallback(() => {
-    document.body.style.overflow = "";
-    if (rootRef.current) {
-      rootRef.current.style.display = "none";
-    }
-    onClose();
-  }, [onClose]);
+    if (closedRef.current) return;
+    closedRef.current = true;
 
-  const handleClosePointer = useCallback(
-    (e: ReactPointerEvent<HTMLButtonElement>) => {
+    document.body.style.overflow = "";
+    hideModalRoot(rootRef.current);
+
+    requestAnimationFrame(() => {
+      onCloseRef.current();
+    });
+  }, []);
+
+  const handleDismiss = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
       e.stopPropagation();
       closeNow();
     },
@@ -174,23 +193,28 @@ export default function PlayerCardReveal({
     >
       <button
         type="button"
-        onClick={closeNow}
+        onTouchStart={handleDismiss}
+        onMouseDown={handleDismiss}
+        onClick={handleDismiss}
         className="absolute inset-0 bg-black/95"
         aria-label="Chiudi"
       />
 
       <div
         className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-[min(94vw,26rem)] flex-col gap-2.5 sm:max-w-md"
-        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onPointerDown={handleClosePointer}
-          className="absolute -top-0.5 right-0 z-30 flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-2xl leading-none text-white select-none"
+        <div
+          role="button"
+          tabIndex={-1}
           aria-label="Chiudi player card"
+          onTouchStartCapture={handleDismiss}
+          onMouseDownCapture={handleDismiss}
+          onClick={handleDismiss}
+          className="absolute -top-0.5 right-0 z-30 flex h-11 w-11 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-2xl leading-none text-white select-none [-webkit-tap-highlight-color:transparent]"
         >
           ×
-        </button>
+        </div>
 
         <div className="relative flex min-h-0 flex-1 items-center justify-center">
           <div className="relative flex h-full max-h-[min(58dvh,34rem)] w-full items-center justify-center overflow-hidden rounded-2xl border border-white/8 bg-black/40">
