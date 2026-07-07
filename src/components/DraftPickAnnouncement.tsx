@@ -73,17 +73,6 @@ export default function DraftPickAnnouncement({
     };
   }, [durationMs, player, slot.slot]);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    if (!mq.matches) return;
-
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
-
   if (!player) return null;
 
   const parts = formatPickAnnouncementParts(slot.slot, player, year);
@@ -96,12 +85,12 @@ export default function DraftPickAnnouncement({
 
   return (
     <div
-      className="slot-pick-intro absolute inset-0 z-20 overflow-hidden rounded-xl max-sm:fixed max-sm:inset-0 max-sm:z-9998 max-sm:rounded-none"
+      className="slot-pick-intro absolute inset-0 z-20 overflow-hidden rounded-xl"
       role="status"
       aria-live="assertive"
       aria-label={`Pick ${slot.slot}: ${player.name}`}
     >
-      <div className="slot-pick-intro-bg absolute inset-0 rounded-xl max-sm:rounded-none" aria-hidden />
+      <div className="slot-pick-intro-accent-line absolute inset-x-0 top-0 z-30 h-px" aria-hidden />
 
       {player.photo ? (
         // eslint-disable-next-line @next/next/no-img-element
@@ -109,89 +98,80 @@ export default function DraftPickAnnouncement({
           src={player.photo}
           alt=""
           aria-hidden
-          className="slot-pick-intro-photo absolute inset-0 h-full w-full object-cover object-[center_15%] max-sm:object-[center_20%]"
+          className="slot-pick-intro-photo absolute inset-0 h-full w-full object-cover object-[center_12%]"
         />
       ) : (
         <div
           aria-hidden
           className="slot-pick-intro-photo absolute inset-0 flex items-center justify-center bg-linear-to-br from-zinc-800 to-zinc-950"
         >
-          <span className="font-display text-6xl font-bold text-white/15 max-sm:text-8xl">
-            {initials}
-          </span>
+          <span className="font-display text-6xl font-bold text-white/12 sm:text-7xl">{initials}</span>
         </div>
       )}
 
-      <div className="slot-pick-intro-vignette absolute inset-0 rounded-xl max-sm:rounded-none" aria-hidden />
-      <div className="slot-pick-intro-grid absolute inset-0 rounded-xl opacity-30 max-sm:hidden" aria-hidden />
+      <div className="slot-pick-intro-bg absolute inset-0 rounded-xl" aria-hidden />
+      <div className="slot-pick-intro-veil absolute inset-0 rounded-xl" aria-hidden />
+      <div className="slot-pick-intro-vignette absolute inset-0 rounded-xl" aria-hidden />
+      <div className="slot-pick-intro-beam absolute inset-0 rounded-xl" aria-hidden />
 
       <span className="slot-pick-intro-corner slot-pick-intro-corner-tl" aria-hidden />
       <span className="slot-pick-intro-corner slot-pick-intro-corner-tr" aria-hidden />
-      <span className="slot-pick-intro-corner slot-pick-intro-corner-bl" aria-hidden />
-      <span className="slot-pick-intro-corner slot-pick-intro-corner-br" aria-hidden />
 
-      <div className="relative flex h-full flex-col justify-between p-2.5 sm:p-3.5 max-sm:justify-end max-sm:px-5 max-sm:pb-[max(1.25rem,env(safe-area-inset-bottom))] max-sm:pt-[max(3.5rem,env(safe-area-inset-top))]">
-        <div className="slot-pick-intro-fade-1 flex items-center justify-between gap-2 max-sm:absolute max-sm:left-5 max-sm:right-5 max-sm:top-[max(1rem,env(safe-area-inset-top))] max-sm:justify-start">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-accent/25 bg-black/45 px-2.5 py-1 backdrop-blur-sm">
-            <span className="live-dot h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-            <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent max-sm:text-[10px] max-sm:tracking-[0.18em]">
-              Live
-            </span>
+      <div className="slot-pick-intro-fade-1 absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 p-2 sm:p-2.5">
+        <div className="inline-flex items-center gap-1.5 rounded-md border border-accent/35 bg-black/55 px-2 py-1 shadow-[0_0_16px_-6px_rgba(0,229,160,0.45)] backdrop-blur-md">
+          <span className="live-dot h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+          <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-accent sm:text-[10px]">
+            Live
+          </span>
+        </div>
+        <div className="rounded-md border border-white/10 bg-black/45 px-2 py-1 backdrop-blur-md">
+          <span className="text-[9px] font-bold uppercase tracking-[0.12em] text-zinc-300 sm:text-[10px]">
+            Draft {year}
+          </span>
+        </div>
+      </div>
+
+      <div className="slot-pick-intro-fade-2 absolute inset-x-0 top-[22%] z-20 flex justify-center sm:top-[24%]">
+        <div className="slot-pick-intro-pick-stage flex items-center gap-2 sm:gap-3">
+          <span className="slot-pick-intro-pick-wing" aria-hidden />
+          <div className="slot-pick-intro-medallion relative">
+            <div className="slot-pick-intro-medallion-glow absolute inset-0 rounded-2xl" aria-hidden />
+            <div className="slot-pick-intro-ring absolute inset-0 rounded-2xl" aria-hidden />
+            <div className="slot-pick-intro-ring slot-pick-intro-ring-delay absolute inset-0 rounded-2xl" aria-hidden />
+            <p className="relative text-[8px] font-bold uppercase tracking-[0.32em] text-accent sm:text-[9px]">
+              The
+            </p>
+            <p className="slot-pick-intro-medallion-pick relative font-display text-[2.15rem] font-bold leading-none sm:text-[2.6rem]">
+              {parts.pickOrdinal}
+            </p>
+            <p className="relative text-[8px] font-bold uppercase tracking-[0.36em] text-accent sm:text-[9px]">
+              Pick
+            </p>
           </div>
-          <span className="text-[8px] font-semibold uppercase tracking-[0.16em] text-zinc-500 max-sm:hidden sm:text-[9px]">
-            Draft · {year}
+          <span className="slot-pick-intro-pick-wing slot-pick-intro-pick-wing-r" aria-hidden />
+        </div>
+      </div>
+
+      <div className="slot-pick-intro-panel slot-pick-intro-fade-3 absolute inset-x-0 bottom-0 z-20 text-center">
+        <p className="text-[8px] font-semibold uppercase tracking-[0.22em] text-zinc-500 sm:text-[9px]">
+          {parts.action}
+        </p>
+        <h3 className="mt-1 line-clamp-2 font-display text-sm font-bold uppercase leading-[1.06] tracking-tight text-white sm:text-base">
+          {parts.player}
+        </h3>
+        <div className="mx-auto mt-1.5 inline-flex max-w-full items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
+          <span className="text-[8px] font-bold uppercase tracking-wider text-accent sm:text-[9px]">
+            from
+          </span>
+          <span className="truncate text-[9px] font-semibold uppercase tracking-wide text-zinc-200 sm:text-[10px]">
+            {parts.from}
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col items-center justify-center px-0.5 py-1 text-center max-sm:flex-none max-sm:items-start max-sm:gap-3 max-sm:py-0 max-sm:text-left">
-          <p className="slot-pick-intro-fade-1 text-[8px] font-semibold uppercase tracking-[0.28em] text-zinc-500 max-sm:text-[10px] sm:text-[9px]">
-            On the clock
-          </p>
-
-          <div className="slot-pick-intro-fade-2 relative mt-2 flex h-12 w-12 flex-col items-center justify-center max-sm:mt-2 max-sm:h-auto max-sm:w-auto max-sm:items-start sm:mt-3 sm:h-16 sm:w-16">
-            <div className="slot-pick-intro-ring absolute inset-0 hidden rounded-full sm:block" aria-hidden />
-            <div className="relative flex h-12 w-12 flex-col items-center justify-center rounded-full border border-accent/40 bg-black/55 shadow-[0_0_24px_-6px_rgba(0,229,160,0.5)] max-sm:hidden sm:h-16 sm:w-16">
-              <span className="font-display text-[9px] font-bold uppercase leading-none tracking-widest text-accent/80 sm:text-[10px]">
-                Pick
-              </span>
-              <span className="font-display text-lg font-bold leading-none text-white sm:text-2xl">
-                #{slot.slot}
-              </span>
-            </div>
-            <div className="hidden max-sm:inline-flex max-sm:items-baseline max-sm:gap-2">
-              <span className="font-display text-sm font-bold uppercase tracking-[0.12em] text-accent">
-                Pick
-              </span>
-              <span className="font-display text-4xl font-bold leading-none text-white">
-                #{slot.slot}
-              </span>
-            </div>
-          </div>
-
-          <div className="w-full max-sm:border-t max-sm:border-white/10 max-sm:pt-3">
-            <p className="slot-pick-intro-fade-3 mt-2.5 text-[8px] font-semibold uppercase tracking-[0.2em] text-zinc-500 max-sm:mt-0 max-sm:text-[10px] max-sm:tracking-[0.24em] sm:mt-4 sm:text-[10px]">
-              {parts.action}
-            </p>
-
-            <h3 className="slot-pick-intro-fade-4 mt-1 line-clamp-2 font-display text-sm font-bold uppercase leading-tight tracking-tight text-white max-sm:line-clamp-none max-sm:text-2xl max-sm:leading-[1.05] sm:text-lg">
-              {parts.player}
-            </h3>
-
-            <p className="slot-pick-intro-fade-5 mt-1 line-clamp-1 text-[8px] font-medium uppercase tracking-[0.12em] text-zinc-300 max-sm:mt-2 max-sm:text-sm sm:text-[10px]">
-              <span className="text-accent">from</span> {parts.from}
-            </p>
-          </div>
-        </div>
-
-        <div className="slot-pick-intro-fade-6 max-sm:mt-4 max-sm:w-full">
-          <div className="mb-1 flex items-center justify-between text-[8px] font-medium uppercase tracking-[0.16em] text-zinc-600 max-sm:text-[10px] max-sm:tracking-[0.14em]">
-            <span className="max-sm:hidden">Commissioner call</span>
-            <span className="hidden max-sm:inline">Annuncio in corso</span>
-            <span>{Math.round(durationMs / 1000)}s</span>
-          </div>
-          <div className="slot-pick-intro-progress-track h-0.5 overflow-hidden rounded-full bg-white/8 max-sm:h-1">
+        <div className="slot-pick-intro-fade-6 mt-2.5 sm:mt-3">
+          <div className="slot-pick-intro-progress-track h-1 overflow-hidden rounded-full bg-white/10">
             <div
-              className="slot-pick-intro-progress-bar h-full rounded-full bg-accent"
+              className="slot-pick-intro-progress-bar h-full rounded-full"
               style={{ animationDuration: `${durationMs}ms` }}
             />
           </div>

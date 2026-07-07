@@ -364,134 +364,178 @@ body {
 }
 
 .slot-pick-intro {
-  animation: slot-pick-intro-in 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  animation: slot-pick-intro-in 0.45s cubic-bezier(0.32, 0.72, 0, 1) forwards;
   box-shadow:
-    0 0 0 1px rgba(0, 229, 160, 0.22),
-    0 0 40px -10px rgba(0, 229, 160, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 0 0 1px rgba(0, 229, 160, 0.28),
+    0 0 48px -12px rgba(0, 229, 160, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.slot-pick-intro-accent-line {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(0, 229, 160, 0.2) 15%,
+    rgba(0, 229, 160, 0.95) 50%,
+    rgba(0, 229, 160, 0.2) 85%,
+    transparent 100%
+  );
 }
 
 .slot-pick-intro-bg {
   background:
-    linear-gradient(165deg, rgba(0, 229, 160, 0.08) 0%, transparent 42%),
-    linear-gradient(180deg, rgba(9, 9, 11, 0.55) 0%, rgba(0, 0, 0, 0.92) 100%);
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.72) 50%, rgba(0, 0, 0, 0.9) 100%);
+  pointer-events: none;
+}
+
+.slot-pick-intro-veil {
+  background: rgba(0, 0, 0, 0.48);
+  pointer-events: none;
 }
 
 .slot-pick-intro-photo {
-  opacity: 0.28;
-  filter: saturate(0.85) contrast(1.05);
-}
-
-@media (max-width: 639px) {
-  .slot-pick-intro {
-    animation: slot-pick-intro-mobile-in 0.42s cubic-bezier(0.32, 0.72, 0, 1) forwards;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  }
-
-  .slot-pick-intro .slot-pick-intro-photo {
-    opacity: 0.42;
-    filter: saturate(0.9) contrast(1.08);
-  }
-
-  .slot-pick-intro .slot-pick-intro-bg {
-    background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.96) 100%);
-  }
-
-  .slot-pick-intro .slot-pick-intro-vignette {
-    background:
-      linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, transparent 38%, rgba(0, 0, 0, 0.72) 72%, rgba(0, 0, 0, 0.95) 100%);
-  }
-
-  .slot-pick-intro .slot-pick-intro-corner {
-    width: 22px;
-    height: 22px;
-    border-color: rgba(0, 229, 160, 0.65);
-  }
-
-  .slot-pick-intro .slot-pick-intro-corner-tl {
-    top: max(14px, env(safe-area-inset-top));
-    left: 16px;
-  }
-
-  .slot-pick-intro .slot-pick-intro-corner-tr {
-    top: max(14px, env(safe-area-inset-top));
-    right: 16px;
-  }
-
-  .slot-pick-intro .slot-pick-intro-corner-bl {
-    bottom: max(14px, env(safe-area-inset-bottom));
-    left: 16px;
-  }
-
-  .slot-pick-intro .slot-pick-intro-corner-br {
-    bottom: max(14px, env(safe-area-inset-bottom));
-    right: 16px;
-  }
-}
-
-@keyframes slot-pick-intro-mobile-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  opacity: 0.2;
+  filter: saturate(0.45) brightness(0.5) blur(1px);
+  transform: scale(1.04);
 }
 
 .slot-pick-intro-vignette {
   background:
-    radial-gradient(ellipse 90% 70% at 50% 35%, transparent 0%, rgba(0, 0, 0, 0.55) 100%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.88) 100%);
+    radial-gradient(ellipse 90% 60% at 50% 20%, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.88) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.78) 55%, rgba(0, 0, 0, 0.97) 100%);
+  pointer-events: none;
 }
 
-.slot-pick-intro-grid {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 14px 14px;
-  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black 20%, transparent 100%);
+.slot-pick-intro-beam {
+  background: radial-gradient(
+    ellipse 62% 38% at 50% 30%,
+    rgba(0, 229, 160, 0.2) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.slot-pick-intro-pick-stage {
+  filter: drop-shadow(0 0 18px rgba(0, 229, 160, 0.22));
+}
+
+.slot-pick-intro-pick-wing {
+  display: block;
+  width: 1.35rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 229, 160, 0.85));
+  box-shadow: 0 0 10px rgba(0, 229, 160, 0.35);
+}
+
+.slot-pick-intro-pick-wing-r {
+  background: linear-gradient(270deg, transparent, rgba(0, 229, 160, 0.85));
+}
+
+.slot-pick-intro-medallion {
+  position: relative;
+  display: flex;
+  min-width: 6rem;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 229, 160, 0.55);
+  background:
+    linear-gradient(165deg, rgba(0, 229, 160, 0.12) 0%, rgba(0, 0, 0, 0.88) 42%, rgba(0, 0, 0, 0.96) 100%);
+  padding: 0.55rem 1rem 0.6rem;
+  box-shadow:
+    0 0 36px -10px rgba(0, 229, 160, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 229, 160, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.slot-pick-intro-medallion-glow {
+  box-shadow: inset 0 0 24px rgba(0, 229, 160, 0.12);
+  pointer-events: none;
+}
+
+.slot-pick-intro-medallion-pick {
+  margin: 0.12rem 0 0.1rem;
+  background: linear-gradient(180deg, #ffffff 0%, #d4ffe8 55%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 0 14px rgba(0, 229, 160, 0.35));
+}
+
+.slot-pick-intro-panel {
+  border-top: 1px solid rgba(0, 229, 160, 0.28);
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.72) 0%,
+    rgba(0, 0, 0, 0.94) 45%,
+    rgba(0, 0, 0, 0.98) 100%
+  );
+  padding: 0.65rem 0.7rem 0.7rem;
+  backdrop-filter: blur(16px);
+}
+
+@media (min-width: 640px) {
+  .slot-pick-intro-panel {
+    padding: 0.75rem 0.85rem 0.85rem;
+  }
+
+  .slot-pick-intro-medallion {
+    min-width: 7rem;
+    padding: 0.65rem 1.15rem 0.7rem;
+  }
+
+  .slot-pick-intro-pick-wing {
+    width: 1.75rem;
+  }
 }
 
 .slot-pick-intro-corner {
   position: absolute;
-  width: 14px;
-  height: 14px;
-  border-color: rgba(0, 229, 160, 0.55);
+  width: 16px;
+  height: 16px;
+  border-color: rgba(0, 229, 160, 0.6);
   pointer-events: none;
 }
 
 .slot-pick-intro-corner-tl {
-  top: 8px;
-  left: 8px;
+  top: 6px;
+  left: 6px;
   border-top: 1.5px solid;
   border-left: 1.5px solid;
 }
 
 .slot-pick-intro-corner-tr {
-  top: 8px;
-  right: 8px;
+  top: 6px;
+  right: 6px;
   border-top: 1.5px solid;
   border-right: 1.5px solid;
 }
 
 .slot-pick-intro-corner-bl {
-  bottom: 8px;
-  left: 8px;
+  bottom: 6px;
+  left: 6px;
   border-bottom: 1.5px solid;
   border-left: 1.5px solid;
 }
 
 .slot-pick-intro-corner-br {
-  bottom: 8px;
-  right: 8px;
+  bottom: 6px;
+  right: 6px;
   border-bottom: 1.5px solid;
   border-right: 1.5px solid;
 }
 
 .slot-pick-intro-ring {
-  border: 1px solid rgba(0, 229, 160, 0.35);
-  animation: slot-pick-intro-ring 1.8s ease-out infinite;
+  border: 1px solid rgba(0, 229, 160, 0.45);
+  border-radius: 1rem;
+  animation: slot-pick-intro-ring 2s ease-out infinite;
+}
+
+.slot-pick-intro-ring-delay {
+  animation-delay: 0.65s;
+  opacity: 0.7;
 }
 
 .slot-pick-intro-fade-1 {
