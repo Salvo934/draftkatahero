@@ -320,7 +320,7 @@ body {
 @keyframes slot-pick-intro-in {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
@@ -328,8 +328,148 @@ body {
   }
 }
 
+@keyframes slot-pick-intro-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slot-pick-intro-ring {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes slot-pick-intro-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 .slot-pick-intro {
-  animation: slot-pick-intro-in 0.35s ease-out forwards;
+  animation: slot-pick-intro-in 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  box-shadow:
+    0 0 0 1px rgba(0, 229, 160, 0.22),
+    0 0 40px -10px rgba(0, 229, 160, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.slot-pick-intro-bg {
+  background:
+    linear-gradient(165deg, rgba(0, 229, 160, 0.08) 0%, transparent 42%),
+    linear-gradient(180deg, rgba(9, 9, 11, 0.55) 0%, rgba(0, 0, 0, 0.92) 100%);
+}
+
+.slot-pick-intro-photo {
+  opacity: 0.28;
+  filter: saturate(0.85) contrast(1.05);
+}
+
+.slot-pick-intro-vignette {
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 35%, transparent 0%, rgba(0, 0, 0, 0.55) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.88) 100%);
+}
+
+.slot-pick-intro-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 14px 14px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, black 20%, transparent 100%);
+}
+
+.slot-pick-intro-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: rgba(0, 229, 160, 0.55);
+  pointer-events: none;
+}
+
+.slot-pick-intro-corner-tl {
+  top: 8px;
+  left: 8px;
+  border-top: 1.5px solid;
+  border-left: 1.5px solid;
+}
+
+.slot-pick-intro-corner-tr {
+  top: 8px;
+  right: 8px;
+  border-top: 1.5px solid;
+  border-right: 1.5px solid;
+}
+
+.slot-pick-intro-corner-bl {
+  bottom: 8px;
+  left: 8px;
+  border-bottom: 1.5px solid;
+  border-left: 1.5px solid;
+}
+
+.slot-pick-intro-corner-br {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 1.5px solid;
+  border-right: 1.5px solid;
+}
+
+.slot-pick-intro-ring {
+  border: 1px solid rgba(0, 229, 160, 0.35);
+  animation: slot-pick-intro-ring 1.8s ease-out infinite;
+}
+
+.slot-pick-intro-fade-1 {
+  animation: slot-pick-intro-fade-up 0.45s cubic-bezier(0.32, 0.72, 0, 1) 0.05s both;
+}
+
+.slot-pick-intro-fade-2 {
+  animation: slot-pick-intro-fade-up 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.12s both;
+}
+
+.slot-pick-intro-fade-3 {
+  animation: slot-pick-intro-fade-up 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.22s both;
+}
+
+.slot-pick-intro-fade-4 {
+  animation: slot-pick-intro-fade-up 0.55s cubic-bezier(0.32, 0.72, 0, 1) 0.32s both;
+}
+
+.slot-pick-intro-fade-5 {
+  animation: slot-pick-intro-fade-up 0.55s cubic-bezier(0.32, 0.72, 0, 1) 0.42s both;
+}
+
+.slot-pick-intro-fade-6 {
+  animation: slot-pick-intro-fade-up 0.5s cubic-bezier(0.32, 0.72, 0, 1) 0.52s both;
+}
+
+.slot-pick-intro-progress-track {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.slot-pick-intro-progress-bar {
+  transform-origin: left center;
+  animation: slot-pick-intro-progress linear forwards;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent), #fff, var(--accent));
+  background-size: 200% 100%;
 }
 
 ::-webkit-scrollbar {

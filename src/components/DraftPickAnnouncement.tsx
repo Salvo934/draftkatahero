@@ -24,10 +24,11 @@ export default function DraftPickAnnouncement({
 
   onCompleteRef.current = onComplete;
 
+  const durationMs = getPickAnnouncementMs(slot.slot);
+
   useEffect(() => {
     completedRef.current = false;
     let cancelled = false;
-    const durationMs = getPickAnnouncementMs(slot.slot);
 
     const finish = () => {
       if (cancelled || completedRef.current) return;
@@ -67,42 +68,109 @@ export default function DraftPickAnnouncement({
         audio.removeEventListener("error", finishOnce);
       }
     };
-  }, [slot.slot, slot.player?.slug]);
+  }, [durationMs, slot.slot, slot.player?.slug]);
 
   if (!slot.player) return null;
 
   const parts = formatPickAnnouncementParts(slot.slot, slot.player, year);
+  const initials = slot.player.name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div
-      className="slot-pick-intro absolute inset-0 z-20 flex flex-col items-center justify-center rounded-xl border border-accent/35 bg-black/92 p-3 text-center shadow-[0_0_32px_-8px_rgba(0,229,160,0.45)] backdrop-blur-sm"
+      className="slot-pick-intro absolute inset-0 z-20 overflow-hidden rounded-xl"
       role="status"
       aria-live="assertive"
       aria-label={`Pick ${slot.slot}: ${slot.player.name}`}
     >
-      <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-accent sm:text-[10px]">
-        On the clock
-      </p>
+      <div className="slot-pick-intro-bg absolute inset-0 rounded-xl" aria-hidden />
 
-      <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-lg border border-accent/30 bg-accent/10 sm:h-11 sm:w-11">
-        <span className="font-display text-lg font-bold text-accent sm:text-xl">#{slot.slot}</span>
+      {slot.player.photo ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={slot.player.photo}
+          alt=""
+          aria-hidden
+          className="slot-pick-intro-photo absolute inset-0 h-full w-full object-cover object-[center_15%]"
+        />
+      ) : (
+        <div
+          aria-hidden
+          className="slot-pick-intro-photo absolute inset-0 flex items-center justify-center bg-linear-to-br from-zinc-800 to-zinc-950"
+        >
+          <span className="font-display text-6xl font-bold text-white/15">{initials}</span>
+        </div>
+      )}
+
+      <div className="slot-pick-intro-vignette absolute inset-0 rounded-xl" aria-hidden />
+      <div className="slot-pick-intro-grid absolute inset-0 rounded-xl opacity-30" aria-hidden />
+
+      <span className="slot-pick-intro-corner slot-pick-intro-corner-tl" aria-hidden />
+      <span className="slot-pick-intro-corner slot-pick-intro-corner-tr" aria-hidden />
+      <span className="slot-pick-intro-corner slot-pick-intro-corner-bl" aria-hidden />
+      <span className="slot-pick-intro-corner slot-pick-intro-corner-br" aria-hidden />
+
+      <div className="relative flex h-full flex-col justify-between p-3 sm:p-3.5">
+        <div className="slot-pick-intro-fade-1 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
+            <span className="live-dot h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+            <span className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent sm:text-[9px]">
+              Live
+            </span>
+          </div>
+          <span className="text-[8px] font-semibold uppercase tracking-[0.18em] text-zinc-500 sm:text-[9px]">
+            KataHero Draft · {year}
+          </span>
+        </div>
+
+        <div className="flex flex-1 flex-col items-center justify-center px-1 py-2 text-center">
+          <p className="slot-pick-intro-fade-1 text-[8px] font-semibold uppercase tracking-[0.32em] text-zinc-500 sm:text-[9px]">
+            On the clock
+          </p>
+
+          <div className="slot-pick-intro-fade-2 relative mt-3 flex flex-col items-center">
+            <div className="slot-pick-intro-ring absolute inset-0 rounded-full" aria-hidden />
+            <div className="relative flex h-14 w-14 flex-col items-center justify-center rounded-full border border-accent/40 bg-black/50 shadow-[0_0_28px_-6px_rgba(0,229,160,0.55)] sm:h-16 sm:w-16">
+              <span className="font-display text-[10px] font-bold uppercase leading-none tracking-[0.12em] text-accent/80">
+                Pick
+              </span>
+              <span className="font-display text-xl font-bold leading-none text-white sm:text-2xl">
+                #{slot.slot}
+              </span>
+            </div>
+          </div>
+
+          <p className="slot-pick-intro-fade-3 mt-4 text-[9px] font-semibold uppercase tracking-[0.24em] text-zinc-500 sm:text-[10px]">
+            {parts.action}
+          </p>
+
+          <h3 className="slot-pick-intro-fade-4 mt-1.5 font-display text-base font-bold uppercase leading-tight tracking-tight text-white sm:text-lg">
+            {parts.player}
+          </h3>
+
+          <p className="slot-pick-intro-fade-5 mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-medium uppercase tracking-[0.14em] text-zinc-300 sm:text-[10px]">
+            <span className="text-accent">from</span>
+            {parts.from}
+          </p>
+        </div>
+
+        <div className="slot-pick-intro-fade-6">
+          <div className="mb-1 flex items-center justify-between text-[8px] font-medium uppercase tracking-[0.16em] text-zinc-600">
+            <span>Commissioner call</span>
+            <span>{Math.round(durationMs / 1000)}s</span>
+          </div>
+          <div className="slot-pick-intro-progress-track h-0.5 overflow-hidden rounded-full bg-white/8">
+            <div
+              className="slot-pick-intro-progress-bar h-full rounded-full bg-accent"
+              style={{ animationDuration: `${durationMs}ms` }}
+            />
+          </div>
+        </div>
       </div>
-
-      <p className="mt-3 line-clamp-3 text-[10px] leading-snug text-zinc-400 sm:text-[11px]">
-        {parts.lead}
-      </p>
-
-      <p className="mt-2 text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-500 sm:text-[10px]">
-        {parts.action}
-      </p>
-
-      <p className="mt-1 font-display text-sm font-bold leading-tight text-white sm:text-base">
-        {parts.player}
-      </p>
-
-      <p className="mt-1 line-clamp-2 text-[10px] text-zinc-500 sm:text-[11px]">
-        from {parts.from}
-      </p>
     </div>
   );
 }

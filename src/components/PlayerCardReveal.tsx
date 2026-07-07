@@ -77,7 +77,7 @@ function UnlockCta({ payUrl, className = "" }: { payUrl: string; className?: str
         Sblocca la tua player card
       </a>
 
-      <p className="mt-2 text-[10px] leading-snug text-zinc-600">
+      <p className="mt-2 text-center text-[10px] leading-snug text-zinc-600">
         Pagamento sicuro con Stripe · Nessuna sorpresa al checkout
       </p>
     </div>
