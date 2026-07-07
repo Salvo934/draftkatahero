@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { KATAHERO_PURCHASE_URL } from "@/lib/card-view";
 
@@ -17,9 +17,14 @@ export default function PlayerCardReveal({
   purchaseUrl = KATAHERO_PURCHASE_URL,
   onClose,
 }: PlayerCardRevealProps) {
+  const closeNow = useCallback(() => {
+    document.body.style.overflow = "";
+    onClose();
+  }, [onClose]);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") closeNow();
     };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKeyDown);
@@ -27,27 +32,30 @@ export default function PlayerCardReveal({
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKeyDown);
     };
-  }, [onClose]);
+  }, [closeNow]);
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6"
+      className="fixed inset-0 z-9999 flex touch-manipulation items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={`Player card di ${name}`}
     >
       <button
         type="button"
-        onClick={onClose}
-        className="absolute inset-0 bg-black/94 backdrop-blur-md"
+        onClick={closeNow}
+        className="absolute inset-0 bg-black/95"
         aria-label="Chiudi"
       />
 
-      <div className="relative z-10 flex w-full max-w-[min(92vw,22rem)] flex-col items-center animate-[popup-in_0.28s_ease-out] sm:max-w-[24rem]">
+      <div className="relative z-10 flex w-full max-w-[min(92vw,22rem)] flex-col items-center sm:max-w-[24rem]">
         <button
           type="button"
-          onClick={onClose}
-          className="absolute -top-2 -right-2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/80 text-xl leading-none text-zinc-200 transition hover:border-accent/50 hover:text-accent sm:-right-4"
+          onClick={(e) => {
+            e.stopPropagation();
+            closeNow();
+          }}
+          className="absolute -top-1 -right-1 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-2xl leading-none text-white active:scale-95 sm:-right-3"
           aria-label="Chiudi player card"
         >
           ×
@@ -57,7 +65,8 @@ export default function PlayerCardReveal({
         <img
           src={image}
           alt={`Player card — ${name}`}
-          className="w-full object-contain drop-shadow-[0_24px_64px_rgba(0,0,0,0.85)]"
+          className="w-full object-contain"
+          decoding="async"
         />
 
         <div className="mt-5 w-full text-center">
@@ -68,7 +77,7 @@ export default function PlayerCardReveal({
             href={purchaseUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-4 inline-flex min-w-[200px] items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition hover:bg-accent/90"
+            className="mt-4 inline-flex min-h-11 min-w-[200px] items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black active:scale-[0.98]"
           >
             Sblocca la tua player card
           </a>
