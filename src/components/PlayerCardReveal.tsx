@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  type MouseEvent,
-  type TouchEvent,
-} from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import {
   getPlayerCardCheckoutUrl,
@@ -77,8 +71,7 @@ function UnlockCta({ payUrl, className = "" }: { payUrl: string; className?: str
         href={payUrl}
         target="_blank"
         rel="noopener noreferrer"
-        onClick={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
+        data-no-dismiss
         className="mt-2.5 flex min-h-12 w-full items-center justify-center rounded-full bg-accent px-4 py-3 text-sm font-bold text-black shadow-[0_0_32px_-8px_rgba(0,229,160,0.55)] active:scale-[0.98] sm:mt-3"
       >
         Sblocca la tua player card
@@ -125,12 +118,20 @@ function PurchasePanel({ payUrl }: { payUrl: string }) {
   );
 }
 
-function hideModalRoot(el: HTMLElement | null) {
-  if (!el) return;
+function hideModalInstantly(el: HTMLElement) {
+  for (const img of el.querySelectorAll("img")) {
+    img.style.filter = "none";
+    img.style.setProperty("-webkit-filter", "none");
+  }
+
   el.style.setProperty("display", "none", "important");
   el.style.setProperty("visibility", "hidden", "important");
   el.style.setProperty("opacity", "0", "important");
   el.style.setProperty("pointer-events", "none", "important");
+  el.style.setProperty("z-index", "-1", "important");
+  el.setAttribute("aria-hidden", "true");
+
+  void el.offsetHeight;
 }
 
 export default function PlayerCardReveal({
@@ -151,22 +152,12 @@ export default function PlayerCardReveal({
     if (closedRef.current) return;
     closedRef.current = true;
 
+    const el = rootRef.current;
+    if (el) hideModalInstantly(el);
+
     document.body.style.overflow = "";
-    hideModalRoot(rootRef.current);
-
-    requestAnimationFrame(() => {
-      onCloseRef.current();
-    });
+    window.setTimeout(() => onCloseRef.current(), 0);
   }, []);
-
-  const handleDismiss = useCallback(
-    (e: MouseEvent | TouchEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeNow();
-    },
-    [closeNow],
-  );
 
   const firstName = name.split(" ")[0];
   const payUrl = checkoutUrl ?? getPlayerCardCheckoutUrl(playerSlug);
@@ -183,6 +174,51 @@ export default function PlayerCardReveal({
     };
   }, [closeNow]);
 
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const onInstantDismiss = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest("[data-no-dismiss]")) return;
+
+      e.stopImmediatePropagation();
+      closeNow();
+    };
+
+    const onBackdropDismiss = (e: Event) => {
+      if (e.target !== e.currentTarget) return;
+      e.stopImmediatePropagation();
+      closeNow();
+    };
+
+    const closeBtn = root.querySelector<HTMLElement>("[data-close-btn]");
+    const backdrop = root.querySelector<HTMLElement>("[data-backdrop]");
+
+    closeBtn?.addEventListener("touchstart", onInstantDismiss, {
+      capture: true,
+      passive: true,
+    });
+    closeBtn?.addEventListener("mousedown", onInstantDismiss, { capture: true });
+    closeBtn?.addEventListener("click", onInstantDismiss, { capture: true });
+
+    backdrop?.addEventListener("touchstart", onBackdropDismiss, {
+      capture: true,
+      passive: true,
+    });
+    backdrop?.addEventListener("mousedown", onBackdropDismiss, { capture: true });
+    backdrop?.addEventListener("click", onBackdropDismiss, { capture: true });
+
+    return () => {
+      closeBtn?.removeEventListener("touchstart", onInstantDismiss, { capture: true });
+      closeBtn?.removeEventListener("mousedown", onInstantDismiss, { capture: true });
+      closeBtn?.removeEventListener("click", onInstantDismiss, { capture: true });
+      backdrop?.removeEventListener("touchstart", onBackdropDismiss, { capture: true });
+      backdrop?.removeEventListener("mousedown", onBackdropDismiss, { capture: true });
+      backdrop?.removeEventListener("click", onBackdropDismiss, { capture: true });
+    };
+  }, [closeNow]);
+
   return createPortal(
     <div
       ref={rootRef}
@@ -191,31 +227,22 @@ export default function PlayerCardReveal({
       aria-modal="true"
       aria-label={locked ? `Anteprima player card di ${name}` : `Player card di ${name}`}
     >
-      <button
-        type="button"
-        onTouchStart={handleDismiss}
-        onMouseDown={handleDismiss}
-        onClick={handleDismiss}
-        className="absolute inset-0 bg-black/95"
-        aria-label="Chiudi"
-      />
+      <div data-backdrop className="absolute inset-0 bg-black/95" aria-hidden />
 
       <div
-        className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-[min(94vw,26rem)] flex-col gap-2.5 sm:max-w-md"
-        onClick={(e) => e.stopPropagation()}
+        data-close-btn
+        role="button"
+        tabIndex={0}
+        aria-label="Chiudi player card"
+        className="fixed right-[max(0.75rem,env(safe-area-inset-right))] top-[max(0.75rem,env(safe-area-inset-top))] z-10000 flex h-11 w-11 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-2xl leading-none text-white select-none [-webkit-tap-highlight-color:transparent]"
       >
-        <div
-          role="button"
-          tabIndex={-1}
-          aria-label="Chiudi player card"
-          onTouchStartCapture={handleDismiss}
-          onMouseDownCapture={handleDismiss}
-          onClick={handleDismiss}
-          className="absolute -top-0.5 right-0 z-30 flex h-11 w-11 cursor-pointer touch-manipulation items-center justify-center rounded-full border border-white/25 bg-zinc-900 text-2xl leading-none text-white select-none [-webkit-tap-highlight-color:transparent]"
-        >
-          ×
-        </div>
+        ×
+      </div>
 
+      <div
+        data-no-dismiss
+        className="relative z-10 mx-auto flex h-full min-h-0 w-full max-w-[min(94vw,26rem)] flex-col gap-2.5 pt-12 sm:max-w-md"
+      >
         <div className="relative flex min-h-0 flex-1 items-center justify-center">
           <div className="relative flex h-full max-h-[min(58dvh,34rem)] w-full items-center justify-center overflow-hidden rounded-2xl border border-white/8 bg-black/40">
             {/* eslint-disable-next-line @next/next/no-img-element */}

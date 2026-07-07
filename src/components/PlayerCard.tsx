@@ -59,8 +59,8 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
   }
 
   function handleCloseReveal() {
-    ignoreClickUntil.current = Date.now() + 450;
-    setRevealed(false);
+    ignoreClickUntil.current = Date.now() + 600;
+    window.setTimeout(() => setRevealed(false), 0);
   }
 
   const card = (
