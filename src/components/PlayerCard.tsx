@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import type { DraftSlot, PlayerProfile } from "@/data/players";
-import { getPlayerCardImage, getPlayerCardUrl } from "@/data/players";
+import {
+  getPlayerCardImage,
+  getPlayerCardUrl,
+  isPlayerCardLocked,
+} from "@/data/players";
 import PlayerCardReveal from "./PlayerCardReveal";
 
 type PlayerCardProps = {
@@ -32,6 +36,7 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
   const [revealed, setRevealed] = useState(false);
   const cardImage = getPlayerCardImage(player);
   const externalUrl = getPlayerCardUrl(player);
+  const cardLocked = isPlayerCardLocked(player);
   const isClickable = Boolean(cardImage || externalUrl);
 
   const initials = player.name
@@ -108,6 +113,7 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
         <PlayerCardReveal
           name={player.name}
           image={cardImage}
+          locked={cardLocked}
           onClose={() => setRevealed(false)}
         />
       )}

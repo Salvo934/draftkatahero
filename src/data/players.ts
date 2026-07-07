@@ -55,6 +55,7 @@ const jasonTaylorProfile: PlayerProfile = {
   category: "NCAA",
   photo: "/players/jason-taylor.png",
   cardImage: "/players/jason-taylor-card.png",
+  cardLocked: true,
 };
 
 /** Prossimo draft — pick #1 in arrivo al drop (nascosta fino a fine intro) */
@@ -72,6 +73,12 @@ export function getPlayerCardImage(player: PlayerProfile): string | undefined {
 
 export function getPlayerCardUrl(player: PlayerProfile): string | undefined {
   return player.playerCardUrl;
+}
+
+/** Card FIFA in anteprima sfocata finché l’atleta non acquista su KataHero */
+export function isPlayerCardLocked(player: PlayerProfile): boolean {
+  if (!player.cardImage) return false;
+  return player.cardLocked ?? true;
 }
 
 /** @deprecated use discoverSlots */

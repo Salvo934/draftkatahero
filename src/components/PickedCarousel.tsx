@@ -121,8 +121,8 @@ function HallOfFameCta() {
         Vuoi la tua player card?
       </p>
       <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        In Hall of Fame entra solo la prima scelta del draft settimanale. Se vuoi la tua
-        scheda KataHero, scrivici su{" "}
+        In Hall of Fame entra solo la prima scelta del draft settimanale. La player card sul sito
+        resta in anteprima sfocata: dopo l&apos;acquisto su{" "}
         <a
           href="https://www.katahero.com"
           target="_blank"
@@ -131,7 +131,8 @@ function HallOfFameCta() {
         >
           katahero.com
         </a>{" "}
-        o su{" "}
+        ti inviamo un link personale con la card in alta qualità e il badge sportivo da usare come
+        preferisci. Per info scrivici anche su{" "}
         <a
           href="https://www.instagram.com/katahero"
           target="_blank"
@@ -139,8 +140,8 @@ function HallOfFameCta() {
           className="font-semibold text-accent underline-offset-2 hover:underline"
         >
           Instagram
-        </a>{" "}
-        — te la invieremo noi.
+        </a>
+        .
       </p>
     </div>
   );
