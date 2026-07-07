@@ -22,7 +22,7 @@ generate() {
   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${AUDIO_DIR}/${num}pick.m4a"
 }
 
-generate 1 "With the first pick in the twenty twenty-six KataHero Draft... KataHero selects... Ilario Simonetti... from Benacquista Assicurazioni Latina."
+generate 1 "With the first pick in the twenty twenty-six KataHero Draft... KataHero selects... Jason Taylor... from USA."
 generate 2 "With the second pick in the twenty twenty-six KataHero Draft... KataHero selects... Luca Bianchi... from UCC Assigeco Piacenza."
 generate 3 "With the third pick in the twenty twenty-six KataHero Draft... KataHero selects... Andrea Verdi... from Fortitudo Bologna."
 

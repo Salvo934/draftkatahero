@@ -11,7 +11,7 @@ type StoredBoard = {
   pickedSlots: DraftSlot[];
 };
 
-const STORAGE_KEY = "draftkatahero-board-v7";
+const STORAGE_KEY = "draftkatahero-board-v8";
 
 function readStorage(): StoredBoard | null {
   if (typeof window === "undefined") return null;

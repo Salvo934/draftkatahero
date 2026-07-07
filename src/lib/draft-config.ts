@@ -1,5 +1,5 @@
 /** Numero totale slot del draft board */
-export const SLOT_COUNT = 30;
+export const SLOT_COUNT = 15;
 
 /** Durata overlay per pick senza audio dedicato */
 export const DEFAULT_ANNOUNCEMENT_MS = 4_500;

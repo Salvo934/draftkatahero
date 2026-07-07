@@ -1,7 +1,7 @@
 import { SLOT_COUNT } from "@/lib/draft-config";
 
 /**
- * - `discoverSlots` → prossima domenica (max 30 giocatori)
+ * - `discoverSlots` → prossima domenica (max 15 giocatori)
  * - `pickedSlots` → Hall of Fame: solo la pick #1 di ogni settimana
  *
  * Dopo ogni draft: sposta solo slot #1 in pickedSlots, svuota discover.
@@ -44,25 +44,23 @@ export type DraftSlot = {
   revealed?: boolean;
 };
 
-const ilarioProfile: PlayerProfile = {
-  slug: "ilario-simonetti",
-  name: "Ilario Simonetti",
+const jasonTaylorProfile: PlayerProfile = {
+  slug: "jason-taylor",
+  name: "Jason Taylor",
   position: "Ala piccola",
-  team: "Benacquista Assicurazioni Latina",
-  country: "Italia",
-  height: "200 cm",
-  birthYear: "2004",
-  category: "Serie B",
-  availability: "Disponibile",
-  photo: "/players/ilario-simonetti.jpg",
-  cardImage: "/players/ilario-card.png",
-  playerCardUrl: "https://ilariosimonetti7.katahero.com",
+  team: "USA",
+  country: "USA",
+  height: "198 cm",
+  birthYear: "2003",
+  category: "NCAA",
+  photo: "/players/jason-taylor.png",
+  cardImage: "/players/jason-taylor-card.png",
 };
 
 /** Prossimo draft — pick #1 in arrivo al drop (nascosta fino a fine intro) */
 export const discoverSlots: DraftSlot[] = Array.from({ length: SLOT_COUNT }, (_, i) => ({
   slot: i + 1,
-  player: i === 0 ? ilarioProfile : null,
+  player: i === 0 ? jasonTaylorProfile : null,
 }));
 
 /** Hall of Fame — si popola dopo ogni rollover con la pick #1 della settimana */

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DM_Sans, Syne } from "next/font/google";
+import { SLOT_COUNT } from "@/lib/draft-config";
 import "./globals.css";
 
 const syne = Syne({
@@ -17,10 +18,10 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "DraftKataHero — Il Draft della Domenica",
   description:
-    "Ogni domenica sera alle 21:00: 30 slot, rivelazione una alla volta. Il draft settimanale KataHero.",
+    `Ogni domenica sera alle 21:00: ${SLOT_COUNT} slot, rivelazione una alla volta. Il draft settimanale KataHero.`,
   openGraph: {
     title: "DraftKataHero",
-    description: "30 slot. Ogni domenica. Una card dopo l'intro di ogni pick.",
+    description: `${SLOT_COUNT} slot. Ogni domenica. Una card dopo l'intro di ogni pick.`,
     type: "website",
   },
 };

@@ -31,7 +31,7 @@ export default function PlayerCardReveal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-9999 flex items-center justify-center p-3 sm:p-6"
+      className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label={`Player card di ${name}`}
@@ -39,49 +39,39 @@ export default function PlayerCardReveal({
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-black/92 backdrop-blur-lg"
+        className="absolute inset-0 bg-black/94 backdrop-blur-md"
         aria-label="Chiudi"
       />
 
-      <div className="relative z-10 w-full max-w-3xl animate-[popup-in_0.28s_ease-out]">
+      <div className="relative z-10 flex w-full max-w-[min(92vw,22rem)] flex-col items-center animate-[popup-in_0.28s_ease-out] sm:max-w-[24rem]">
         <button
           type="button"
           onClick={onClose}
-          className="absolute -top-3 right-0 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-black/80 text-2xl leading-none text-zinc-200 transition hover:border-accent/50 hover:text-accent sm:-right-3"
+          className="absolute -top-2 -right-2 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/80 text-xl leading-none text-zinc-200 transition hover:border-accent/50 hover:text-accent sm:-right-4"
           aria-label="Chiudi player card"
         >
           ×
         </button>
 
-        <div className="overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-card-hover ring-1 ring-white/10">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={image}
-            alt={`Player card — ${name}`}
-            className="mx-auto max-h-[min(68vh,720px)] w-full object-contain bg-black"
-          />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt={`Player card — ${name}`}
+          className="w-full object-contain drop-shadow-[0_24px_64px_rgba(0,0,0,0.85)]"
+        />
 
-          <div className="border-t border-white/10 bg-black/90 px-5 py-5 text-center sm:px-8 sm:py-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
-              Pick rivelata
-            </p>
-            <h2 className="mt-2 font-display text-xl font-bold uppercase tracking-tight text-white sm:text-2xl">
-              {name}
-            </h2>
-            <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-zinc-400">
-              Vuoi la tua player card KataHero in alta qualità? Acquistala ora sul nostro sito.
-            </p>
-            <div className="mt-5 flex justify-center">
-              <a
-                href={purchaseUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-w-[220px] items-center justify-center rounded-full bg-accent px-6 py-3.5 text-sm font-bold uppercase tracking-wide text-black transition hover:bg-accent/90"
-              >
-                Acquista
-              </a>
-            </div>
-          </div>
+        <div className="mt-5 w-full text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-accent">
+            Player card
+          </p>
+          <a
+            href={purchaseUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex min-w-[200px] items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-black transition hover:bg-accent/90"
+          >
+            Sblocca la tua player card
+          </a>
         </div>
       </div>
     </div>,
