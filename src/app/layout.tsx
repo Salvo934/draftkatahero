@@ -16,6 +16,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://draft.katahero.com"),
   title: "DraftKataHero — Il Draft della Domenica",
   description:
     `Ogni domenica sera alle 21:00: ${SLOT_COUNT} slot, rivelazione una alla volta. Il draft settimanale KataHero.`,
@@ -23,6 +24,7 @@ export const metadata: Metadata = {
     title: "DraftKataHero",
     description: `${SLOT_COUNT} slot. Ogni domenica. Una card dopo l'intro di ogni pick.`,
     type: "website",
+    url: "https://draft.katahero.com",
   },
 };
 
