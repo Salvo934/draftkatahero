@@ -44,6 +44,13 @@ export type DraftSlot = {
   revealed?: boolean;
 };
 
+export type OverallAlbumEntry = {
+  index: number;
+  player: PlayerProfile | null;
+  /** Settimana draft in cui la card è entrata in album */
+  collectedWeekLabel?: string;
+};
+
 const jasonTaylorProfile: PlayerProfile = {
   slug: "jason-taylor",
   name: "Jason Taylor",
@@ -57,6 +64,12 @@ const jasonTaylorProfile: PlayerProfile = {
   cardImage: "/players/jason-taylor-card.png",
   cardLocked: true,
 };
+
+/** Album overall Panini — una card FIFA per ogni slot/collezionabile */
+export const overallAlbumSeed: OverallAlbumEntry[] = Array.from({ length: SLOT_COUNT }, (_, i) => ({
+  index: i + 1,
+  player: i === 0 ? jasonTaylorProfile : null,
+}));
 
 /** Prossimo draft — pick #1 in arrivo al drop (nascosta fino a fine intro) */
 export const discoverSlots: DraftSlot[] = Array.from({ length: SLOT_COUNT }, (_, i) => ({

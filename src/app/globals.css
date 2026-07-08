@@ -573,6 +573,207 @@ body {
   background-size: 200% 100%;
 }
 
+/* ── Album Overall — card sospese ── */
+@keyframes album-card-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--album-tilt, 0deg));
+  }
+  50% {
+    transform: translateY(-11px) rotate(calc(var(--album-tilt, 0deg) + 1.4deg));
+  }
+}
+
+.album-gallery-glow {
+  background:
+    radial-gradient(ellipse 75% 45% at 50% 35%, rgba(0, 229, 160, 0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 50% at 50% 100%, rgba(0, 229, 160, 0.04) 0%, transparent 55%);
+}
+
+.album-gallery-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: min(100%, 11rem) min(100%, 14rem);
+  mask-image: radial-gradient(ellipse 85% 70% at 50% 45%, black 15%, transparent 100%);
+}
+
+.album-stage {
+  position: relative;
+  display: flex;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  perspective: 900px;
+  --album-card-box-height: 58%;
+  --album-card-box-width: 62%;
+}
+
+@media (min-width: 1024px) {
+  .album-stage {
+    --album-card-box-height: 70%;
+    --album-card-box-width: 74%;
+  }
+
+  .album-slot-index {
+    top: 4%;
+  }
+}
+
+@media (min-width: 1280px) {
+  .album-stage {
+    --album-card-box-height: 74%;
+    --album-card-box-width: 78%;
+  }
+}
+
+.album-stage-interactive {
+  cursor: pointer;
+}
+
+.album-wire {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 0;
+  height: 18%;
+  width: 1px;
+  --album-tilt: 0deg;
+  transform: translateX(-50%) rotate(var(--album-tilt));
+  transform-origin: top center;
+  background: linear-gradient(180deg, rgba(0, 229, 160, 0.55) 0%, rgba(255, 255, 255, 0.15) 100%);
+  opacity: 0.85;
+}
+
+.album-wire-ghost {
+  opacity: 0.2;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
+}
+
+.album-pin {
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  z-index: 5;
+  height: 6px;
+  width: 6px;
+  --album-tilt: 0deg;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 229, 160, 0.8);
+}
+
+.album-slot-index {
+  position: absolute;
+  top: 8%;
+  left: 50%;
+  z-index: 20;
+  --album-tilt: 0deg;
+  transform: translateX(-50%);
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(0, 229, 160, 0.85);
+  text-shadow: 0 0 12px rgba(0, 229, 160, 0.35);
+}
+
+.album-slot-index-ghost {
+  color: rgba(255, 255, 255, 0.12);
+  text-shadow: none;
+}
+
+.album-card-ghost {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  height: var(--album-card-box-height);
+  width: var(--album-card-box-width);
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.65rem;
+  border: 1px dashed rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.015);
+  transform: rotate(var(--album-tilt, 0deg));
+}
+
+.album-card-ghost.album-card-filled {
+  z-index: 10;
+  display: block;
+  height: var(--album-card-box-height);
+  width: var(--album-card-box-width);
+  padding: 0;
+  overflow: visible;
+  border: none;
+  background: transparent;
+  transform-origin: center 88%;
+  animation: album-card-float 4.6s ease-in-out infinite;
+}
+
+.album-card-ghost.album-card-filled .album-card-img {
+  display: block;
+  height: 100%;
+  width: 100%;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  filter: saturate(1.04) contrast(1.02);
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.album-stage-interactive:hover .album-card-ghost.album-card-filled .album-card-img {
+  transform: scale(1.03);
+  filter: saturate(1.08) contrast(1.02);
+}
+
+.album-player-name {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  z-index: 20;
+  max-width: 92%;
+  --album-tilt: 0deg;
+  transform: translateX(-50%);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display), system-ui, sans-serif;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+}
+
+.album-slot-label {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.18);
+}
+
+.album-floor-shadow-ghost {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  z-index: 0;
+  height: 0.65rem;
+  width: 38%;
+  transform: translateX(-50%);
+  border-radius: 9999px;
+  background: radial-gradient(ellipse, rgba(255, 255, 255, 0.06) 0%, transparent 72%);
+  filter: blur(3px);
+  opacity: 0.35;
+}
+
 ::-webkit-scrollbar {
   width: 5px;
 }

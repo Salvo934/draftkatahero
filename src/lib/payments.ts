@@ -3,6 +3,7 @@ import {
   KATAHERO_PURCHASE_URL,
   PLAYER_CARD_PRICE,
 } from "@/lib/card-view";
+import { getShopCheckoutUrl, SHOP_PRODUCTS } from "@/lib/shop";
 
 /** Portale clienti Stripe — fatture, metodo di pagamento, abbonamento. */
 const STRIPE_CUSTOMER_PORTAL_DEFAULT =
@@ -24,4 +25,7 @@ export const PAYMENTS = {
   processorPrivacyUrl: "https://stripe.com/it/privacy",
   playerCardPrice: PLAYER_CARD_PRICE,
   packagesUrl: `${KATAHERO_PURCHASE_URL}/pacchetti`,
+  shopUrl: "/negozio",
 } as const;
+
+export { getShopCheckoutUrl, SHOP_PRODUCTS };
