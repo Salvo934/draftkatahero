@@ -68,7 +68,7 @@ const jasonTaylorProfile: PlayerProfile = {
 /** Album overall Panini — una card FIFA per ogni slot/collezionabile */
 export const overallAlbumSeed: OverallAlbumEntry[] = Array.from({ length: SLOT_COUNT }, (_, i) => ({
   index: i + 1,
-  player: i === 0 ? jasonTaylorProfile : null,
+  player: null,
 }));
 
 /** Prossimo draft — pick #1 in arrivo al drop (nascosta fino a fine intro) */
