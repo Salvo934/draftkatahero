@@ -5,6 +5,7 @@ import type { DraftSlot, PlayerProfile } from "@/data/players";
 import {
   getPlayerCardImage,
   getPlayerCardUrl,
+  getPlayerThumbnailImage,
   isPlayerCardLocked,
 } from "@/data/players";
 import PlayerCardReveal from "./PlayerCardReveal";
@@ -36,6 +37,7 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
   const [revealed, setRevealed] = useState(false);
   const ignoreClickUntil = useRef(0);
   const cardImage = getPlayerCardImage(player);
+  const thumbnailImage = getPlayerThumbnailImage(player);
   const externalUrl = getPlayerCardUrl(player);
   const cardLocked = isPlayerCardLocked(player);
   const isClickable = Boolean(cardImage || externalUrl);
@@ -86,20 +88,30 @@ function MiniCard({ slot, player }: { slot: number; player: PlayerProfile }) {
     >
       <div className="accent-line absolute inset-x-0 top-0 z-20 h-px opacity-80" />
 
-      <div className="relative flex-1 overflow-hidden bg-zinc-900">
-        {player.photo ? (
+      <div
+        className={`relative flex-1 overflow-hidden ${
+          cardImage ? "bg-black/40" : "bg-zinc-900"
+        }`}
+      >
+        {thumbnailImage ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={player.photo}
+            src={thumbnailImage}
             alt={player.name}
-            className="h-full w-full object-cover object-[center_15%] transition duration-500 group-hover:scale-[1.04]"
+            className={
+              cardImage
+                ? "h-full w-full object-contain p-2 transition duration-500 group-hover:scale-[1.03]"
+                : "h-full w-full object-cover object-[center_15%] transition duration-500 group-hover:scale-[1.04]"
+            }
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-zinc-800 to-zinc-950">
             <span className="font-display text-5xl font-bold text-white/90">{initials}</span>
           </div>
         )}
-        <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/90 via-black/10 to-transparent" />
+        {!cardImage && (
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black/90 via-black/10 to-transparent" />
+        )}
         <div className="absolute left-3 top-3 z-10 flex h-8 min-w-8 items-center justify-center rounded-lg bg-accent px-2 shadow-accent-badge">
           <span className="font-display text-sm font-bold leading-none text-black">#{slot}</span>
         </div>

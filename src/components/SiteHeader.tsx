@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 const NAV_LINKS = [
   { href: "/album", label: "Album Overall" },
@@ -10,6 +11,9 @@ const NAV_LINKS = [
   { href: "/#board", label: "Da scoprire" },
   { href: "/#rivelate", label: "Hall of Fame" },
 ] as const;
+
+const MOBILE_NAV_TOP =
+  "max(4.75rem,calc(3.75rem + env(safe-area-inset-top)))";
 
 function linkClassName(active: boolean) {
   return `block rounded-xl px-4 py-3 text-[15px] font-medium transition ${
@@ -32,9 +36,76 @@ function isActive(pathname: string, href: string) {
   return pathname === href;
 }
 
+function MobileNavMenu({
+  open,
+  pathname,
+  onClose,
+}: {
+  open: boolean;
+  pathname: string;
+  onClose: () => void;
+}) {
+  if (!open) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-9998 md:hidden">
+      <button
+        type="button"
+        className="absolute inset-0 bg-black/90 backdrop-blur-sm"
+        aria-label="Chiudi menu"
+        onClick={onClose}
+      />
+
+      <nav
+        id="mobile-nav-panel"
+        className="absolute right-3 left-3 rounded-2xl border border-white/10 bg-zinc-950 p-3 shadow-[0_24px_64px_-20px_rgba(0,0,0,0.9)] sm:right-5 sm:left-5"
+        style={{ top: MOBILE_NAV_TOP }}
+        aria-label="Menu mobile"
+      >
+        <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
+          Navigazione
+        </p>
+        <div className="space-y-1">
+          {NAV_LINKS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={linkClassName(isActive(pathname, item.href))}
+              onClick={onClose}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        <div className="mt-3 border-t border-white/8 pt-3">
+          <a
+            href="https://www.katahero.com/#contatti"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-accent flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-sm font-semibold"
+            onClick={onClose}
+          >
+            KataHero
+            <span aria-hidden className="text-base leading-none">
+              →
+            </span>
+          </a>
+        </div>
+      </nav>
+    </div>,
+    document.body,
+  );
+}
+
 export default function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -48,16 +119,21 @@ export default function SiteHeader() {
   }, [pathname]);
 
   useEffect(() => {
+    if (!open) return;
+
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
+
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [open]);
+
+  const closeMenu = () => setOpen(false);
 
   return (
     <>
-      <div className="fixed top-0 right-0 left-0 z-50 px-3 pt-3 sm:px-5 lg:px-8">
+      <div className="fixed top-0 right-0 left-0 z-9999 px-3 pt-3 sm:px-5 lg:px-8">
         <div className="glass-panel mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-2xl px-4 py-3 sm:rounded-full sm:px-5">
           <Link
             href="/"
@@ -129,52 +205,8 @@ export default function SiteHeader() {
         </div>
       </div>
 
-      {open ? (
-        <div className="fixed inset-0 z-40 md:hidden" aria-hidden={!open}>
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/75 backdrop-blur-[2px]"
-            aria-label="Chiudi menu"
-            onClick={() => setOpen(false)}
-          />
-
-          <nav
-            id="mobile-nav-panel"
-            className="mobile-nav-panel absolute top-[max(4.75rem,calc(3.75rem+env(safe-area-inset-top)))] right-3 left-3 rounded-2xl border border-white/10 bg-zinc-950/95 p-3 shadow-[0_24px_64px_-20px_rgba(0,0,0,0.9)] sm:right-5 sm:left-5"
-            aria-label="Menu mobile"
-          >
-            <p className="px-4 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
-              Navigazione
-            </p>
-            <div className="space-y-1">
-              {NAV_LINKS.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={linkClassName(isActive(pathname, item.href))}
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </div>
-
-            <div className="mt-3 border-t border-white/8 pt-3">
-              <a
-                href="https://www.katahero.com/#contatti"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-accent flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-sm font-semibold"
-                onClick={() => setOpen(false)}
-              >
-                KataHero
-                <span aria-hidden className="text-base leading-none">
-                  →
-                </span>
-              </a>
-            </div>
-          </nav>
-        </div>
+      {mounted ? (
+        <MobileNavMenu open={open} pathname={pathname} onClose={closeMenu} />
       ) : null}
     </>
   );

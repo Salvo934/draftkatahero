@@ -84,6 +84,11 @@ export function getPlayerCardImage(player: PlayerProfile): string | undefined {
   return player.cardImage;
 }
 
+/** Card FIFA se disponibile, altrimenti foto profilo — stessa immagine su mobile e desktop */
+export function getPlayerThumbnailImage(player: PlayerProfile): string | undefined {
+  return player.cardImage ?? player.photo;
+}
+
 export function getPlayerCardUrl(player: PlayerProfile): string | undefined {
   return player.playerCardUrl;
 }

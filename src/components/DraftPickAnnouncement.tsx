@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { ActivePickAnnouncement } from "@/lib/draft-announcement";
+import { getPlayerThumbnailImage } from "@/data/players";
 import {
   formatPickAnnouncementParts,
   getPickAnnouncementMs,
@@ -76,6 +77,8 @@ export default function DraftPickAnnouncement({
   if (!player) return null;
 
   const parts = formatPickAnnouncementParts(slot.slot, player, year);
+  const thumbnailImage = getPlayerThumbnailImage(player);
+  const usesFifaCard = Boolean(player.cardImage);
   const initials = player.name
     .split(" ")
     .map((n) => n[0])
@@ -92,13 +95,17 @@ export default function DraftPickAnnouncement({
     >
       <div className="slot-pick-intro-accent-line absolute inset-x-0 top-0 z-30 h-px" aria-hidden />
 
-      {player.photo ? (
+      {thumbnailImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={player.photo}
+          src={thumbnailImage}
           alt=""
           aria-hidden
-          className="slot-pick-intro-photo absolute inset-0 h-full w-full object-cover object-[center_12%]"
+          className={
+            usesFifaCard
+              ? "slot-pick-intro-photo absolute inset-0 h-full w-full object-contain object-center p-3 sm:p-4"
+              : "slot-pick-intro-photo absolute inset-0 h-full w-full object-cover object-[center_12%]"
+          }
         />
       ) : (
         <div
