@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Footer from "@/components/Footer";
 import ShopCatalog from "@/components/ShopCatalog";
 import SiteHeader from "@/components/SiteHeader";
-import "../shop.css";
+import "./shop.css";
 
 export const metadata: Metadata = {
   title: "Negozio Card — DraftKataHero",
