@@ -8,7 +8,7 @@ import "./shop.css";
 export const metadata: Metadata = {
   title: "Negozio Card — DraftKataHero",
   description:
-    "Item Shop stile Fortnite: punti Overall, booster temporanei, slot album ed estetica premium per la tua player card.",
+    "Card Overall da €4,99 o pacchetto completo con player page a €9,99. Scegli il piano giusto per la tua presenza da cestista.",
 };
 
 function ShopLoading() {

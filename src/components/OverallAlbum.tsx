@@ -4,19 +4,14 @@ import { useEffect, useState, type CSSProperties } from "react";
 import type { OverallAlbumEntry } from "@/data/players";
 import { getPlayerCardImage, isPlayerCardLocked } from "@/data/players";
 import { loadDraftBoardState } from "@/lib/draft-board";
-import { SLOT_COUNT } from "@/lib/draft-config";
-import { buildOverallAlbum, countCollectedOverallCards } from "@/lib/overall-album";
+import { buildOverallAlbum } from "@/lib/overall-album";
+import AlbumAthleteGuide from "./AlbumAthleteGuide";
+import CardRequestForm from "./CardRequestForm";
 import PlayerCardReveal from "./PlayerCardReveal";
 
 const ALBUM_TILTS = [-2.8, 1.6, -1.2, 2.2, -1.8, 1.1, -2.2, 0.8, -1.5, 2.5, -0.9, 1.9, -2.4, 1.3, -1.1];
 
-function AlbumSectionHeader({
-  collected,
-  total,
-}: {
-  collected: number;
-  total: number;
-}) {
+function AlbumSectionHeader() {
   return (
     <div className="mb-10 max-w-xl">
       <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-accent">
@@ -25,12 +20,6 @@ function AlbumSectionHeader({
       <h2 className="mt-2 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-[2.45rem] md:leading-[1.14]">
         Album <span className="text-gradient-accent">Overall</span>
       </h2>
-      <p className="mt-3 text-sm leading-relaxed text-zinc-400 sm:text-base">
-        Player card FIFA sospese nel vuoto — ogni pick aggiunge una figurina overall alla collezione.
-        <span className="ml-1 font-semibold text-zinc-300">
-          {collected}/{total} collezionate.
-        </span>
-      </p>
     </div>
   );
 }
@@ -138,6 +127,7 @@ export default function OverallAlbum() {
   const [entries, setEntries] = useState<OverallAlbumEntry[]>(() =>
     buildOverallAlbum([], []),
   );
+  const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     const sync = () => {
@@ -150,13 +140,14 @@ export default function OverallAlbum() {
     return () => clearInterval(id);
   }, []);
 
-  const collected = countCollectedOverallCards(entries);
-
   return (
     <section className="relative z-10 mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="pointer-events-none absolute inset-x-4 top-10 h-px bg-linear-to-r from-transparent via-white/10 to-transparent sm:inset-x-6 lg:inset-x-8" />
 
-      <AlbumSectionHeader collected={collected} total={SLOT_COUNT} />
+      <AlbumSectionHeader />
+
+      <AlbumAthleteGuide onOpenForm={() => setFormOpen(true)} />
+      <CardRequestForm open={formOpen} onClose={() => setFormOpen(false)} />
 
       <div className="album-gallery relative py-4 sm:py-6 md:py-8">
         <div className="album-gallery-glow pointer-events-none absolute inset-0" aria-hidden />
