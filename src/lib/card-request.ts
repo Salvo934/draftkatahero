@@ -35,7 +35,6 @@ export type CardRequestPayload = {
   pageSections?: string[];
   notes?: string;
   privacyAccepted: boolean;
-  photoFileName?: string;
 };
 
 export const CARD_POSITIONS = [
@@ -136,9 +135,7 @@ export function formatCardRequestEmail(payload: CardRequestPayload): {
     payload.highlightsUrl ? `Link highlights: ${payload.highlightsUrl}` : null,
     "",
     "--- FOTO CARD ---",
-    payload.photoFileName
-      ? `File foto allegato dall'atleta: ${payload.photoFileName}`
-      : "Foto: da allegare all'email",
+    "Allega la foto su WhatsApp dopo l'invio (ritratto o mezzo busto, buona luce, sfondo neutro).",
     "",
     payload.notes ? `Note extra:\n${payload.notes}` : null,
     "",

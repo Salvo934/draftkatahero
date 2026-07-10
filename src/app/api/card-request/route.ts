@@ -14,13 +14,8 @@ export async function POST(request: Request) {
     }
 
     const payload = JSON.parse(raw) as CardRequestPayload;
-    const photo = formData.get("photo");
 
-    const { subject, body } = formatCardRequestEmail({
-      ...payload,
-      photoFileName:
-        photo instanceof File ? photo.name : payload.photoFileName,
-    });
+    const { subject, body } = formatCardRequestEmail(payload);
 
     // Log strutturato per raccolta richieste (Vercel logs / future integrazione email)
     console.info("[card-request]", {
@@ -29,8 +24,6 @@ export async function POST(request: Request) {
       package: payload.package,
       athlete: `${payload.firstName} ${payload.lastName}`,
       email: payload.email,
-      hasPhoto: photo instanceof File,
-      photoSize: photo instanceof File ? photo.size : 0,
     });
 
     return Response.json({

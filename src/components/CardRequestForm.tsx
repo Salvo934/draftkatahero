@@ -120,8 +120,6 @@ function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
 export default function CardRequestForm({ open, onClose }: CardRequestFormProps) {
   const [mounted, setMounted] = useState(false);
   const [form, setForm] = useState<FormState>(INITIAL);
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -142,16 +140,6 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
-
-  useEffect(() => {
-    if (!photo) {
-      setPhotoPreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(photo);
-    setPhotoPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [photo]);
 
   const patch = useCallback((partial: Partial<FormState>) => {
     setForm((prev) => ({ ...prev, ...partial }));
@@ -174,8 +162,6 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
     if (!form.team.trim()) return "Inserisci squadra o club.";
     if (!form.heightCm.trim()) return "Inserisci l'altezza in cm.";
     if (!form.birthYear.trim()) return "Inserisci anno di nascita / classe.";
-    if (!photo) return "Allega la foto per la card (ritratto o mezzo busto).";
-    if (photo.size > 10 * 1024 * 1024) return "La foto deve essere sotto i 10 MB.";
 
     const stats = [form.statAth, form.statSho, form.statPas, form.statDri, form.statDef, form.statPhy];
     for (const stat of stats) {
@@ -232,7 +218,6 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
           : undefined,
       notes: form.notes.trim() || undefined,
       privacyAccepted: form.privacyAccepted,
-      photoFileName: photo?.name,
     };
   }
 
@@ -251,7 +236,6 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
     try {
       const data = new FormData();
       data.append("payload", JSON.stringify(payload));
-      if (photo) data.append("photo", photo);
       await fetch("/api/card-request", { method: "POST", body: data });
     } catch {
       /* WhatsApp fallback sotto */
@@ -264,7 +248,6 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
 
   function handleReset() {
     setForm(INITIAL);
-    setPhoto(null);
     setSent(false);
     setError(null);
     onClose();
@@ -312,10 +295,11 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
           <div className="card-form-success flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-8 sm:px-6">
             <p className="font-display text-lg font-bold text-white">Richiesta pronta!</p>
             <p className="text-sm leading-relaxed text-zinc-400">
-              Si è aperto WhatsApp con tutti i dati compilati.{" "}
-              <strong className="text-zinc-200">Allega la foto</strong> ({photo?.name}) al messaggio
-              e invia al <strong className="text-zinc-200">327 459 7773</strong>. Ti risponderemo con
-              il giorno di uscita nell&apos;album.
+              Si è aperto WhatsApp con tutti i dati compilati. Invia il messaggio al{" "}
+              <strong className="text-zinc-200">327 459 7773</strong>, poi{" "}
+              <strong className="text-zinc-200">allega la foto</strong> per la card (ritratto o
+              mezzo busto) in un secondo messaggio. Ti risponderemo con il giorno di uscita
+              nell&apos;album.
             </p>
             <button type="button" onClick={handleReset} className="btn-accent mt-2 rounded-full px-5 py-2.5 text-sm font-semibold">
               Chiudi
@@ -472,28 +456,8 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
               </fieldset>
 
               <fieldset className="card-form__section">
-                <legend className="card-form__legend">5 · Foto per la card</legend>
-                <p className="card-form__section-note">
-                  Ritratto o mezzo busto, buona luce, sfondo neutro. JPG o PNG, max 10 MB.
-                </p>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  required
-                  className="card-form__file"
-                  onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
-                />
-                {photoPreview ? (
-                  <div className="card-form__photo-preview">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photoPreview} alt="Anteprima foto card" />
-                  </div>
-                ) : null}
-              </fieldset>
-
-              <fieldset className="card-form__section">
                 <legend className="card-form__legend">
-                  6 · Stagione{form.package === "card-player-page" ? "" : " (opzionale)"}
+                  5 · Stagione{form.package === "card-player-page" ? "" : " (opzionale)"}
                 </legend>
                 {form.package === "card-player-page" ? (
                   <p className="card-form__section-note">
@@ -554,7 +518,7 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
 
               {form.package === "card-player-page" ? (
                 <fieldset className="card-form__section">
-                  <legend className="card-form__legend">7 · Player page (opzionale ora)</legend>
+                  <legend className="card-form__legend">6 · Player page (opzionale ora)</legend>
                   <p className="card-form__section-note">
                     Indica le sezioni che ti interessano (€9,99 cad. dopo l&apos;uscita). Puoi attivarle in seguito dal negozio.
                   </p>
@@ -604,10 +568,11 @@ export default function CardRequestForm({ open, onClose }: CardRequestFormProps)
 
             <footer className="card-form__footer shrink-0 border-t border-white/8 px-4 py-4 sm:px-6">
               <button type="submit" className="btn-accent w-full rounded-full px-5 py-3 text-sm font-semibold">
-                Invia richiesta con foto →
+                Invia richiesta →
               </button>
               <p className="mt-2 text-center text-[10px] text-zinc-600">
-                Si aprirà WhatsApp — allega la foto selezionata e invia al 327 459 7773
+                Si aprirà WhatsApp — invia i dati al 327 459 7773, poi allega la foto in un secondo
+                messaggio
               </p>
             </footer>
           </form>

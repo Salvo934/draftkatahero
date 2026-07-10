@@ -6,7 +6,7 @@ const STEPS = [
   {
     n: "1",
     title: "Richiedi la tua card",
-    text: "Scegli Card Overall (€4,99) o Card + Player Page (€9,99) e compila il form con foto e dati atleta.",
+    text: "Scegli Card Overall (€4,99) o Card + Player Page (€9,99) e compila il form con i dati atleta.",
   },
   {
     n: "2",
