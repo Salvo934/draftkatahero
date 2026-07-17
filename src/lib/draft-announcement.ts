@@ -61,19 +61,27 @@ export type ActivePickAnnouncement = {
   year: number;
 };
 
-/** Profilo voce commissioner (Adam Silver) — pick #2+ */
+/** Profilo voce commissioner (Adam Silver) — pick #3 */
 export const PICK_VOICE_PROFILE = {
   voice: "en-US-EricNeural",
   rate: "-20%",
   pitch: "+5Hz",
 } as const;
 
-/** Pick #1 — highlight ESPN enfatico ~5s (GuyNeural) */
+/** Pick #1 — highlight schiacciata ~5s */
 export const PICK_1_HIGHLIGHTS_VOICE = {
   voice: "en-US-GuyNeural",
   rate: "+12%",
   pitch: "+3Hz",
-  style: "highlights",
+  style: "highlights-dunk",
+} as const;
+
+/** Pick #2 — highlight triple ~4,5s */
+export const PICK_2_HIGHLIGHTS_VOICE = {
+  voice: "en-US-GuyNeural",
+  rate: "+12%",
+  pitch: "+3Hz",
+  style: "highlights-three",
 } as const;
 
 /** Audio intro per pick */
@@ -89,7 +97,7 @@ export const PICK_INTRO_MS = 14_600;
 /** Durata intro allineata ai file audio (ms) — lo slot compare a fine intro */
 export const PICK_ANNOUNCEMENT_MS: Partial<Record<number, number>> = {
   1: 5_440,
-  2: PICK_INTRO_MS,
+  2: 4_450,
   3: PICK_INTRO_MS,
 };
 
