@@ -25,26 +25,26 @@ generate_highlights() {
   local num=$1
   local text=$2
   local mode="${3:-fixed}"
-  # ESPN energy ma voce pulita — niente riverbero, EQ leggero
+  # Studio pulito — TTS neutra, mastering minimo, niente loudnorm/riverbero/EQ aggressivo
   local voice="en-US-GuyNeural"
-  local rate="+4%"
+  local rate="+0%"
   local pitch="+0Hz"
-  local af_base="highpass=f=80,lowpass=f=12000,equalizer=f=2800:t=q:w=1.2:g=1,acompressor=threshold=-18dB:ratio=2:attack=8:release=100,loudnorm=I=-16:TP=-1.5:LRA=11"
+  local af_base="highpass=f=90,lowpass=f=11000,adeclick,deesser=i=0.35,acompressor=threshold=-22dB:ratio=1.4:attack=15:release=250,alimiter=limit=0.92:attack=7:release=80,afade=t=in:ss=0:d=0.025"
   local af
 
   if [ "$mode" = "natural" ]; then
-    af="${af_base},apad=pad_dur=0.5"
+    af="${af_base},apad=pad_dur=0.35"
   else
     af="${af_base},apad=pad_dur=${TARGET},atrim=0:${TARGET}"
   fi
 
   edge-tts --voice "$voice" --rate="$rate" --pitch="$pitch" --volume="+0%" --text "$text" --write-media "/tmp/${num}pick-raw.mp3"
-  ffmpeg -y -i "/tmp/${num}pick-raw.mp3" -af "$af" -c:a aac -b:a 192k -movflags +faststart "${AUDIO_DIR}/${num}pick.m4a" 2>/dev/null
+  ffmpeg -y -i "/tmp/${num}pick-raw.mp3" -af "$af" -c:a aac -b:a 256k -movflags +faststart "${AUDIO_DIR}/${num}pick.m4a" 2>/dev/null
   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${AUDIO_DIR}/${num}pick.m4a"
 }
 
-# Pick #1 — solo hype highlights ESPN
-generate_highlights 1 "OH! What a dunk! Kevin Basile rises up... throws it down with AUTHORITY!" natural
+# Pick #1 — solo hype highlights ESPN (studio)
+generate_highlights 1 "Oh! What a dunk! Kevin Basile rises up... throws it down with authority!" natural
 
 # Pick #2–3 — commissioner draft
 generate_commissioner 2 "With the second pick in the twenty twenty-six KataHero Draft... KataHero selects... Luca Bianchi... from UCC Assigeco Piacenza."
