@@ -97,7 +97,7 @@ export const PICK_INTRO_MS = 14_600;
 /** Durata intro allineata ai file audio (ms) — lo slot compare a fine intro */
 export const PICK_ANNOUNCEMENT_MS: Partial<Record<number, number>> = {
   1: 5_440,
-  2: 4_450,
+  2: 3_080,
   3: PICK_INTRO_MS,
 };
 

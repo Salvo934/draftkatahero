@@ -38,7 +38,7 @@ generate_highlight_commentary() {
 generate_highlight_commentary 1 "Basile drives... rises up... OH! WHAT A DUNK!"
 
 # Pick #2 — triple
-generate_highlight_commentary 2 "Kevin Basile pulls up... for three... YES!"
+generate_highlight_commentary 2 "Kevin Basile for threeee, yeeeessss!"
 
 # Pick #3 — commissioner draft
 generate_commissioner 3 "With the third pick in the twenty twenty-six KataHero Draft... KataHero selects... Andrea Verdi... from Fortitudo Bologna."
