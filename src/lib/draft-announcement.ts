@@ -68,11 +68,12 @@ export const PICK_VOICE_PROFILE = {
   pitch: "+5Hz",
 } as const;
 
-/** Pick #1 — voce ESPN studio pulita (GuyNeural) */
+/** Pick #1 — telecronaca live ESPN (GuyNeural) */
 export const PICK_1_HIGHLIGHTS_VOICE = {
   voice: "en-US-GuyNeural",
-  rate: "+0%",
-  pitch: "+0Hz",
+  rate: "+6%",
+  pitch: "+1Hz",
+  style: "live-commentary",
 } as const;
 
 /** Audio intro per pick */
@@ -87,7 +88,7 @@ export const PICK_INTRO_MS = 14_600;
 
 /** Durata intro allineata ai file audio (ms) — lo slot compare a fine intro */
 export const PICK_ANNOUNCEMENT_MS: Partial<Record<number, number>> = {
-  1: 7_360,
+  1: 8_680,
   2: PICK_INTRO_MS,
   3: PICK_INTRO_MS,
 };
