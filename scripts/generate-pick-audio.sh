@@ -25,21 +25,21 @@ generate_highlights() {
   local num=$1
   local text=$2
   local mode="${3:-fixed}"
-  # ESPN / SportsCenter energy — più veloce, più compresso, più “broadcast”
+  # ESPN energy ma voce pulita — niente riverbero, EQ leggero
   local voice="en-US-GuyNeural"
-  local rate="+10%"
-  local pitch="+1Hz"
-  local af_base="highpass=f=130,lowpass=f=10500,equalizer=f=200:t=q:w=1:g=3.5,equalizer=f=3000:t=q:w=1.4:g=3,acompressor=threshold=-13dB:ratio=4.5:attack=2:release=45,aecho=0.4:0.5:22:0.14,loudnorm=I=-14:TP=-1:LRA=8"
+  local rate="+4%"
+  local pitch="+0Hz"
+  local af_base="highpass=f=80,lowpass=f=12000,equalizer=f=2800:t=q:w=1.2:g=1,acompressor=threshold=-18dB:ratio=2:attack=8:release=100,loudnorm=I=-16:TP=-1.5:LRA=11"
   local af
 
   if [ "$mode" = "natural" ]; then
-    af="${af_base},apad=pad_dur=0.6"
+    af="${af_base},apad=pad_dur=0.5"
   else
     af="${af_base},apad=pad_dur=${TARGET},atrim=0:${TARGET}"
   fi
 
-  edge-tts --voice "$voice" --rate="$rate" --pitch="$pitch" --volume="+8%" --text "$text" --write-media "/tmp/${num}pick-raw.mp3"
-  ffmpeg -y -i "/tmp/${num}pick-raw.mp3" -af "$af" -c:a aac -b:a 128k -movflags +faststart "${AUDIO_DIR}/${num}pick.m4a" 2>/dev/null
+  edge-tts --voice "$voice" --rate="$rate" --pitch="$pitch" --volume="+0%" --text "$text" --write-media "/tmp/${num}pick-raw.mp3"
+  ffmpeg -y -i "/tmp/${num}pick-raw.mp3" -af "$af" -c:a aac -b:a 192k -movflags +faststart "${AUDIO_DIR}/${num}pick.m4a" 2>/dev/null
   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${AUDIO_DIR}/${num}pick.m4a"
 }
 
