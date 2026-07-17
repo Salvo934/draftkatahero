@@ -67,18 +67,19 @@ generate_highlights() {
 
 generate_live_commentary() {
   local num=$1
-  local text="Here comes Kevin Basile... drives baseline... he rises up... oh! What a dunk! Throws it down with authority!"
+  # Highlight ~4–5s — commento sincronizzato alla schiacciata
+  local text="Basile drives... rises... oh! What a dunk!"
   local voice="en-US-GuyNeural"
-  local rate="+6%"
+  local rate="+8%"
   local pitch="+1Hz"
-  local af="highpass=f=90,lowpass=f=11000,adeclick,deesser=i=0.35,acompressor=threshold=-22dB:ratio=1.4:attack=15:release=250,alimiter=limit=0.92:attack=7:release=80,afade=t=in:ss=0:d=0.025,apad=pad_dur=0.35"
+  local af="highpass=f=90,lowpass=f=11000,adeclick,deesser=i=0.35,acompressor=threshold=-22dB:ratio=1.4:attack=15:release=250,alimiter=limit=0.92:attack=7:release=80,afade=t=in:ss=0:d=0.02,apad=pad_dur=0.25"
 
   edge-tts --voice "$voice" --rate="$rate" --pitch="$pitch" --volume="+0%" --text "$text" --write-media "/tmp/${num}pick-raw.mp3"
   ffmpeg -y -i "/tmp/${num}pick-raw.mp3" -af "$af" -c:a aac -b:a 256k -movflags +faststart "${AUDIO_DIR}/${num}pick.m4a" 2>/dev/null
   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${AUDIO_DIR}/${num}pick.m4a"
 }
 
-# Pick #1 — telecronaca live (SSML con pause e crescendo)
+# Pick #1 — highlight ESPN (~5s)
 generate_live_commentary 1
 
 # Pick #2–3 — commissioner draft
