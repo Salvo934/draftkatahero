@@ -67,14 +67,14 @@ generate_highlights() {
 
 generate_live_commentary() {
   local num=$1
-  # Highlight ~4–5s — commento sincronizzato alla schiacciata
-  local text="Basile drives... rises... oh! What a dunk!"
+  # Highlight ~5s — massima enfasi, ritmo veloce
+  local text="Basile drives... rises up... OH! WHAT A DUNK!"
   local voice="en-US-GuyNeural"
-  local rate="+8%"
-  local pitch="+1Hz"
-  local af="highpass=f=90,lowpass=f=11000,adeclick,deesser=i=0.35,acompressor=threshold=-22dB:ratio=1.4:attack=15:release=250,alimiter=limit=0.92:attack=7:release=80,afade=t=in:ss=0:d=0.02,apad=pad_dur=0.25"
+  local rate="+12%"
+  local pitch="+3Hz"
+  local af="highpass=f=90,lowpass=f=11000,adeclick,deesser=i=0.4,acompressor=threshold=-20dB:ratio=1.8:attack=10:release=180,alimiter=limit=0.94:attack=5:release=60,afade=t=in:ss=0:d=0.015,apad=pad_dur=0.2"
 
-  edge-tts --voice "$voice" --rate="$rate" --pitch="$pitch" --volume="+0%" --text "$text" --write-media "/tmp/${num}pick-raw.mp3"
+  edge-tts --voice "$voice" --rate="$rate" --pitch="$pitch" --volume="+6%" --text "$text" --write-media "/tmp/${num}pick-raw.mp3"
   ffmpeg -y -i "/tmp/${num}pick-raw.mp3" -af "$af" -c:a aac -b:a 256k -movflags +faststart "${AUDIO_DIR}/${num}pick.m4a" 2>/dev/null
   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${AUDIO_DIR}/${num}pick.m4a"
 }

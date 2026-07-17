@@ -68,11 +68,11 @@ export const PICK_VOICE_PROFILE = {
   pitch: "+5Hz",
 } as const;
 
-/** Pick #1 — highlight ESPN ~5s (GuyNeural) */
+/** Pick #1 — highlight ESPN enfatico ~5s (GuyNeural) */
 export const PICK_1_HIGHLIGHTS_VOICE = {
   voice: "en-US-GuyNeural",
-  rate: "+8%",
-  pitch: "+1Hz",
+  rate: "+12%",
+  pitch: "+3Hz",
   style: "highlights",
 } as const;
 
@@ -88,7 +88,7 @@ export const PICK_INTRO_MS = 14_600;
 
 /** Durata intro allineata ai file audio (ms) — lo slot compare a fine intro */
 export const PICK_ANNOUNCEMENT_MS: Partial<Record<number, number>> = {
-  1: 4_760,
+  1: 5_440,
   2: PICK_INTRO_MS,
   3: PICK_INTRO_MS,
 };
