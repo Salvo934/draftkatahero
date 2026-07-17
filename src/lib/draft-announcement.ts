@@ -91,3 +91,13 @@ export function getPickAnnouncementMs(
 ): number {
   return PICK_ANNOUNCEMENT_MS[slot] ?? fallback;
 }
+
+export function getPickAudioDownloads() {
+  return Object.entries(PICK_ANNOUNCEMENT_AUDIO)
+    .map(([slot, src]) => ({
+      slot: Number(slot),
+      src: src!,
+      filename: `${slot}pick.m4a`,
+    }))
+    .sort((a, b) => a.slot - b.slot);
+}

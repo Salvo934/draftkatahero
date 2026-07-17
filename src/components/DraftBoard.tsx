@@ -20,6 +20,7 @@ import {
   type SimulationPlayback,
 } from "@/lib/simulation-playback";
 import { stopPickAudio, unlockPickAudio } from "@/lib/pick-audio";
+import { getPickAudioDownloads } from "@/lib/draft-announcement";
 import DraftPickAnnouncement from "./DraftPickAnnouncement";
 import PlayerCard from "./PlayerCard";
 import PickedCarousel, { HallOfFameCta } from "./PickedCarousel";
@@ -243,6 +244,16 @@ export default function DraftBoard() {
               Esci simulazione
             </button>
           )}
+          {getPickAudioDownloads().map(({ slot, src, filename }) => (
+            <a
+              key={slot}
+              href={src}
+              download={filename}
+              className="inline-flex items-center justify-center rounded-full border border-white/12 bg-white/5 px-4 py-2.5 text-sm font-medium text-zinc-300 transition hover:border-accent/30 hover:bg-accent/10 hover:text-white"
+            >
+              ↓ Pick {slot}
+            </a>
+          ))}
           {isSimulating && (
             <span className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
