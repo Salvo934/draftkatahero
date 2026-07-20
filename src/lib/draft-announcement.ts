@@ -76,12 +76,12 @@ export const PICK_1_HIGHLIGHTS_VOICE = {
   style: "highlights-dunk",
 } as const;
 
-/** Pick #2 — highlight triple ~4,5s */
-export const PICK_2_HIGHLIGHTS_VOICE = {
-  voice: "en-US-GuyNeural",
-  rate: "+12%",
-  pitch: "+3Hz",
-  style: "highlights-three",
+/** Pick #2 — voce macchina IT neutra (né uomo né donna) */
+export const PICK_2_VOICE = {
+  voice: "it-IT-GiuseppeMultilingualNeural",
+  rate: "-28%",
+  pitch: "+0Hz",
+  style: "machine-italian",
 } as const;
 
 /** Audio intro per pick */
@@ -97,7 +97,7 @@ export const PICK_INTRO_MS = 14_600;
 /** Durata intro allineata ai file audio (ms) — lo slot compare a fine intro */
 export const PICK_ANNOUNCEMENT_MS: Partial<Record<number, number>> = {
   1: 5_440,
-  2: 3_080,
+  2: 8_654,
   3: PICK_INTRO_MS,
 };
 

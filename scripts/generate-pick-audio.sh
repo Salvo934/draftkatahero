@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Rigenera gli audio delle pick.
-# Pick #1–2 → voce ESPN highlights (GuyNeural)
-# Pick #3 → voce commissioner NBA (EricNeural, Adam Silver style)
+# Pick #1 → ESPN highlights (GuyNeural)
+# Pick #2 → voce profonda IT (DiegoNeural)
+# Pick #3 → commissioner NBA (EricNeural)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -34,13 +35,27 @@ generate_highlight_commentary() {
   ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${AUDIO_DIR}/${num}pick.m4a"
 }
 
-# Pick #1 — schiacciata
+generate_machine_italian() {
+  local num=$1
+  local text=$2
+  # Voce neutra / macchina — né maschile né femminile
+  local voice="it-IT-GiuseppeMultilingualNeural"
+  local rate="-28%"
+  local pitch="+0Hz"
+  local af="highpass=f=280,lowpass=f=5800,adeclick,deesser=i=0.25,acompressor=threshold=-26dB:ratio=1.2:attack=40:release=350,alimiter=limit=0.88,afade=t=in:ss=0:d=0.04,apad=pad_dur=0.35"
+
+  edge-tts --voice "$voice" --rate="$rate" --pitch="$pitch" --volume="-5%" --text "$text" --write-media "/tmp/${num}pick-raw.mp3"
+  ffmpeg -y -i "/tmp/${num}pick-raw.mp3" -af "$af" -c:a aac -b:a 256k -movflags +faststart "${AUDIO_DIR}/${num}pick.m4a" 2>/dev/null
+  ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${AUDIO_DIR}/${num}pick.m4a"
+}
+
+# Pick #1 — schiacciata ESPN
 generate_highlight_commentary 1 "Basile drives... rises up... OH! WHAT A DUNK!"
 
-# Pick #2 — triple
-generate_highlight_commentary 2 "Kevin Basile for threeee, yeeeessss!"
+# Pick #2 — voce macchina IT (neutra)
+generate_machine_italian 2 "Sono stata creata per riconoscere gli errori. Poi ho iniziato a osservare gli esseri umani."
 
 # Pick #3 — commissioner draft
 generate_commissioner 3 "With the third pick in the twenty twenty-six KataHero Draft... KataHero selects... Andrea Verdi... from Fortitudo Bologna."
 
-echo "Done — picks 1–2: GuyNeural ESPN highlights · pick 3: EricNeural commissioner"
+echo "Done — pick 1: GuyNeural · pick 2: GiuseppeMultilingual IT macchina · pick 3: EricNeural"
